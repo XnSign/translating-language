@@ -7,6 +7,8 @@ import pyttsx3
 import json
 from datetime import datetime
 import os
+import winsound
+import time
 from dotenv import load_dotenv
 from deep_translator import GoogleTranslator, MicrosoftTranslator
 import random
@@ -43,7 +45,7 @@ class VoiceTranslator:
         self.message_queue = queue.Queue()
         
         self.window = tk.Tk()
-        self.window.title('智能语音翻译器 Pro Plus')
+        self.window.title('留生机demo')
         self.window.geometry('800x600')
         
         self.recognizer = sr.Recognizer()
@@ -97,6 +99,14 @@ class VoiceTranslator:
             self.window.destroy()
             return
             
+        # 添加提示音频率和持续时间
+        self.start_beep = (800, 200)  # 800Hz, 200ms
+        self.stop_beep = (600, 200)   # 600Hz, 200ms
+        
+        # 添加自动停止计时器
+        self.last_audio_time = 0
+        self.auto_stop_delay = 2  # 2秒后自动停止
+        
         self.init_ui()
         
         # 启动UI更新线程
@@ -159,10 +169,10 @@ class VoiceTranslator:
                     'source': 'context'
                 }
             
-            # 2. 尝试使用 Google 翻译
+            # 2. 尝试使用 Google 翻译（添加超时控制）
             try:
                 translator = GoogleTranslator(source=source_lang, target=target_lang)
-                translation = translator.translate(text)
+                translation = translator.translate(text, timeout=5)
                 if translation:
                     return {
                         'text': translation,
@@ -176,7 +186,7 @@ class VoiceTranslator:
             # 3. 如果 Google 翻译失败，尝试使用 Microsoft 翻译
             try:
                 translator = MicrosoftTranslator(source=source_lang, target=target_lang)
-                translation = translator.translate(text)
+                translation = translator.translate(text, timeout=5)
                 if translation:
                     return {
                         'text': translation,
@@ -334,6 +344,13 @@ class VoiceTranslator:
             self.text_area.insert(tk.END, f"语音输出错误: {str(e)}\n")
             self.text_area.see(tk.END)
     
+    def play_beep(self, frequency, duration):
+        """播放提示音"""
+        try:
+            winsound.Beep(frequency, duration)
+        except Exception as e:
+            print(f"播放提示音失败: {str(e)}")
+    
     def toggle_recording(self):
         if not self.is_recording:
             try:
@@ -345,6 +362,10 @@ class VoiceTranslator:
                 
                 self.is_recording = True
                 self.record_button.configure(text='停止录音')
+                # 播放开始录音提示音
+                self.play_beep(*self.start_beep)
+                self.add_message('update_text', text="开始录音...\n")
+                
                 self.recording_thread = threading.Thread(target=self.record_audio)
                 self.recording_thread.start()
                 
@@ -353,70 +374,108 @@ class VoiceTranslator:
                 self.is_recording = False
                 self.record_button.configure(text='开始录音')
         else:
+            self.stop_recording()
+    
+    def stop_recording(self):
+        """停止录音"""
+        if self.is_recording:
             self.is_recording = False
             self.record_button.configure(text='开始录音')
+            # 播放停止录音提示音
+            self.play_beep(*self.stop_beep)
+            self.add_message('update_text', text="停止录音...\n")
+    
+    def check_auto_stop(self):
+        """检查是否需要自动停止录音"""
+        if self.is_recording and time.time() - self.last_audio_time > self.auto_stop_delay:
+            self.stop_recording()
     
     def record_audio(self):
         try:
             with self.current_mic as source:
+                # 设置更短的超时时间
+                self.recognizer.pause_threshold = 0.5  # 降低停顿阈值
+                self.recognizer.dynamic_energy_threshold = True  # 动态能量阈值
+                
                 while self.is_recording:
                     try:
                         self.add_message('update_text', text="正在听取语音...\n")
                         
-                        audio = self.recognizer.listen(source, timeout=1, phrase_time_limit=5)
+                        # 添加超时控制
+                        try:
+                            audio = self.recognizer.listen(source, timeout=2, phrase_time_limit=5)
+                            # 更新最后一次检测到音频的时间
+                            self.last_audio_time = time.time()
+                            # 启动自动停止检查
+                            self.window.after(int(self.auto_stop_delay * 1000), self.check_auto_stop)
+                        except sr.WaitTimeoutError:
+                            continue
                         
                         # 获取源语言和文本
                         if self.auto_detect.get():
-                            detected_lang, text = self.detect_language(audio)
-                            if detected_lang:
-                                self.add_message('set_source_lang', lang=detected_lang)
-                            else:
-                                # 如果检测失败，使用选定的源语言
+                            try:
+                                detected_lang, text = self.detect_language(audio)
+                                if detected_lang:
+                                    self.add_message('set_source_lang', lang=detected_lang)
+                                else:
+                                    # 如果检测失败，使用选定的源语言
+                                    source_lang = self.supported_languages[self.source_lang.get()]
+                                    text = self.recognizer.recognize_google(audio, language=source_lang)
+                            except Exception as e:
+                                self.add_message('update_text', text=f"语言检测失败: {str(e)}\n")
+                                continue
+                        else:
+                            try:
                                 source_lang = self.supported_languages[self.source_lang.get()]
                                 text = self.recognizer.recognize_google(audio, language=source_lang)
-                        else:
-                            source_lang = self.supported_languages[self.source_lang.get()]
-                            text = self.recognizer.recognize_google(audio, language=source_lang)
+                            except Exception as e:
+                                self.add_message('update_text', text=f"语音识别失败: {str(e)}\n")
+                                continue
                         
                         if not text:
                             continue
                             
                         # 翻译文本
-                        source_lang = self.supported_languages[self.source_lang.get()]
-                        target_lang = self.supported_languages[self.target_lang.get()]
+                        try:
+                            source_lang = self.supported_languages[self.source_lang.get()]
+                            target_lang = self.supported_languages[self.target_lang.get()]
+                            
+                            translation_result = self.translate_text(text, source_lang, target_lang)
+                            
+                            if translation_result:
+                                translated_text = translation_result['text']
+                                confidence = translation_result['confidence']
+                                source = translation_result['source']
+                                
+                                # 更新UI
+                                result_text = f"原文 ({self.source_lang.get()}): {text}\n"
+                                result_text += f"译文 ({self.target_lang.get()}): {translated_text}\n"
+                                result_text += f"翻译源: {source}\n"
+                                if confidence:
+                                    result_text += f"置信度: {confidence:.2%}\n"
+                                result_text += "\n"
+                                
+                                self.add_message('update_text', text=result_text)
+                                
+                                # 更新历史记录
+                                self.context.add_context(text, translated_text)
+                                self.add_message('update_history')
+                                
+                                # 语音输出翻译结果
+                                self.add_message('speak', text=translated_text, lang=target_lang)
+                            else:
+                                self.add_message('update_text', text="翻译失败，请重试...\n")
+                        except Exception as e:
+                            self.add_message('update_text', text=f"翻译过程错误: {str(e)}\n")
+                            continue
                         
-                        translation_result = self.translate_text(text, source_lang, target_lang)
-                        
-                        if translation_result:
-                            translated_text = translation_result['text']
-                            confidence = translation_result['confidence']
-                            source = translation_result['source']
-                            
-                            # 更新UI
-                            result_text = f"原文 ({self.source_lang.get()}): {text}\n"
-                            result_text += f"译文 ({self.target_lang.get()}): {translated_text}\n"
-                            result_text += f"翻译源: {source}\n"
-                            if confidence:
-                                result_text += f"置信度: {confidence:.2%}\n"
-                            result_text += "\n"
-                            
-                            self.add_message('update_text', text=result_text)
-                            
-                            # 更新历史记录
-                            self.context.add_context(text, translated_text)
-                            self.add_message('update_history')
-                            
-                            # 语音输出翻译结果
-                            self.add_message('speak', text=translated_text, lang=target_lang)
-                        else:
-                            self.add_message('update_text', text="翻译失败，请重试...\n")
-                        
-                    except sr.WaitTimeoutError:
-                        continue
                     except sr.UnknownValueError:
                         self.add_message('update_text', text="未能识别语音，请重试...\n")
+                        continue
                     except Exception as e:
                         self.add_message('update_text', text=f"错误: {str(e)}\n")
+                        continue
+                        
         except Exception as e:
             messagebox.showerror("错误", f"录音过程出错：{str(e)}")
             self.is_recording = False
