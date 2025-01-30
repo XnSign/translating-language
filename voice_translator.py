@@ -1,37 +1,33 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
-import queue
 import speech_recognition as sr
 import pyttsx3
 import json
 from datetime import datetime
 import os
-import winsound
+import requests
+import hashlib
 import time
 from dotenv import load_dotenv
-from deep_translator import GoogleTranslator, MicrosoftTranslator
 import random
+from googletrans import Translator as GoogleTranslator
 
 class TranslationContext:
     def __init__(self, max_history=5):
         self.history = []
         self.max_history = max_history
-        self._lock = threading.Lock()
     
     def add_context(self, text, translation):
-        with self._lock:
-            self.history.append((text, translation))
-            if len(self.history) > self.max_history:
-                self.history.pop(0)
+        self.history.append((text, translation))
+        if len(self.history) > self.max_history:
+            self.history.pop(0)
     
     def get_context(self):
-        with self._lock:
-            return list(self.history)
+        return self.history
     
     def clear_context(self):
-        with self._lock:
-            self.history = []
+        self.history = []
 
 class VoiceTranslator:
     def __init__(self):
@@ -41,8 +37,8 @@ class VoiceTranslator:
         # 初始化翻译上下文
         self.context = TranslationContext()
         
-        # 初始化消息队列
-        self.message_queue = queue.Queue()
+        # 初始化翻译服务
+        self.init_translation_services()
         
         self.window = tk.Tk()
         self.window.title('留生机demo')
@@ -50,6 +46,28 @@ class VoiceTranslator:
         
         self.recognizer = sr.Recognizer()
         self.is_recording = False
+        
+        # 初始化语音引擎
+        try:
+            self.engine = pyttsx3.init()
+            voices = self.engine.getProperty('voices')
+            self.voice_list = [voice.name for voice in voices]
+        except Exception as e:
+            messagebox.showerror("错误", f"初始化语音输出引擎失败：{str(e)}")
+            self.engine = None
+            self.voice_list = []
+        
+        # 检查麦克风
+        try:
+            self.mic_list = sr.Microphone.list_microphone_names()
+            if not self.mic_list:
+                messagebox.showerror("错误", "未检测到麦克风设备！请确保麦克风已正确连接。")
+                self.window.destroy()
+                return
+        except Exception as e:
+            messagebox.showerror("错误", f"初始化麦克风时出错：{str(e)}\n请检查麦克风是否正确连接和启用。")
+            self.window.destroy()
+            return
         
         # 支持的语言
         self.supported_languages = {
@@ -77,67 +95,22 @@ class VoiceTranslator:
             }
         }
         
-        # 初始化语音引擎
-        try:
-            self.engine = pyttsx3.init()
-            voices = self.engine.getProperty('voices')
-            self.voice_list = [voice.name for voice in voices]
-        except Exception as e:
-            messagebox.showerror("错误", f"初始化语音输出引擎失败：{str(e)}")
-            self.engine = None
-            self.voice_list = []
-        
-        # 检查麦克风
-        try:
-            self.mic_list = sr.Microphone.list_microphone_names()
-            if not self.mic_list:
-                messagebox.showerror("错误", "未检测到麦克风设备！请确保麦克风已正确连接。")
-                self.window.destroy()
-                return
-        except Exception as e:
-            messagebox.showerror("错误", f"初始化麦克风时出错：{str(e)}\n请检查麦克风是否正确连接和启用。")
-            self.window.destroy()
-            return
-            
-        # 添加提示音频率和持续时间
-        self.start_beep = (800, 200)  # 800Hz, 200ms
-        self.stop_beep = (600, 200)   # 600Hz, 200ms
-        
-        # 添加自动停止计时器
-        self.last_audio_time = 0
-        self.auto_stop_delay = 2  # 2秒后自动停止
-        
         self.init_ui()
         
-        # 启动UI更新线程
-        self.window.after(100, self.process_message_queue)
-    
-    def process_message_queue(self):
-        """处理消息队列中的UI更新请求"""
-        try:
-            while True:
-                message = self.message_queue.get_nowait()
-                message_type = message.get('type')
-                
-                if message_type == 'update_text':
-                    self.text_area.insert(tk.END, message['text'])
-                    self.text_area.see(tk.END)
-                elif message_type == 'update_history':
-                    self.update_history_display()
-                elif message_type == 'speak':
-                    self.speak_text(message['text'], message['lang'])
-                elif message_type == 'set_source_lang':
-                    self.source_lang.set(message['lang'])
-        except queue.Empty:
-            pass
-        finally:
-            self.window.after(100, self.process_message_queue)
-    
-    def add_message(self, message_type, **kwargs):
-        """添加消息到队列"""
-        message = {'type': message_type}
-        message.update(kwargs)
-        self.message_queue.put(message)
+    def init_translation_services(self):
+        """初始化所有翻译服务"""
+        # Azure 翻译
+        self.azure_key = os.getenv('AZURE_TRANSLATOR_KEY')
+        self.azure_region = os.getenv('AZURE_TRANSLATOR_REGION')
+        self.azure_endpoint = os.getenv('AZURE_TRANSLATOR_ENDPOINT')
+        
+        # 百度翻译
+        self.baidu_app_id = os.getenv('BAIDU_APP_ID')
+        self.baidu_secret_key = os.getenv('BAIDU_SECRET_KEY')
+        
+        # 有道翻译
+        self.youdao_app_key = os.getenv('YOUDAO_APP_KEY')
+        self.youdao_app_secret = os.getenv('YOUDAO_APP_SECRET')
     
     def analyze_context(self, text, prev_texts):
         """分析上下文，返回更适合的翻译"""
@@ -158,49 +131,177 @@ class VoiceTranslator:
     
     def translate_text(self, text, source_lang, target_lang):
         """使用多个翻译源进行翻译"""
-        try:
-            # 1. 检查是否有上下文特殊处理
-            context_translation = self.analyze_context(text, self.context.get_context())
-            if context_translation:
-                return {
-                    'text': context_translation,
-                    'detected_language': source_lang,
-                    'confidence': 1.0,
-                    'source': 'context'
+        translations = []
+        confidence_scores = []
+        
+        # 1. 检查是否有上下文特殊处理
+        context_translation = self.analyze_context(text, self.context.get_context())
+        if context_translation:
+            return {
+                'text': context_translation,
+                'detected_language': source_lang,
+                'confidence': 1.0,
+                'source': 'context'
+            }
+        
+        # 2. 尝试使用百度翻译
+        if self.baidu_app_id and self.baidu_secret_key:
+            try:
+                # 百度翻译语言代码映射
+                baidu_lang_map = {
+                    'zh-CN': 'zh',
+                    'zh-TW': 'cht',
+                    'en': 'en',
+                    'ja': 'jp',
+                    'ko': 'kor',
+                    'fr': 'fra',
+                    'de': 'de',
+                    'es': 'spa',
+                    'ru': 'ru'
                 }
-            
-            # 2. 尝试使用 Google 翻译（添加超时控制）
-            try:
-                translator = GoogleTranslator(source=source_lang, target=target_lang)
-                translation = translator.translate(text, timeout=5)
-                if translation:
-                    return {
-                        'text': translation,
-                        'detected_language': source_lang,
-                        'confidence': 0.9,
-                        'source': 'Google翻译'
-                    }
+                
+                baidu_result = self.baidu_translate(
+                    text,
+                    baidu_lang_map.get(source_lang, source_lang),
+                    baidu_lang_map.get(target_lang, target_lang)
+                )
+                if baidu_result and 'trans_result' in baidu_result:
+                    translations.append(baidu_result['trans_result'][0]['dst'])
+                    confidence_scores.append(0.8)  # 百度翻译默认置信度
             except Exception as e:
-                print(f"Google翻译错误: {str(e)}")
-            
-            # 3. 如果 Google 翻译失败，尝试使用 Microsoft 翻译
+                print(f"百度翻译错误: {str(e)}")
+        
+        # 3. 尝试使用有道翻译
+        if self.youdao_app_key and self.youdao_app_secret:
             try:
-                translator = MicrosoftTranslator(source=source_lang, target=target_lang)
-                translation = translator.translate(text, timeout=5)
-                if translation:
-                    return {
-                        'text': translation,
-                        'detected_language': source_lang,
-                        'confidence': 0.8,
-                        'source': 'Microsoft翻译'
-                    }
+                # 有道翻译语言代码映射
+                youdao_lang_map = {
+                    'zh-CN': 'zh-CHS',
+                    'zh-TW': 'zh-CHT',
+                    'en': 'en',
+                    'ja': 'ja',
+                    'ko': 'ko',
+                    'fr': 'fr',
+                    'de': 'de',
+                    'es': 'es',
+                    'ru': 'ru'
+                }
+                
+                youdao_result = self.youdao_translate(
+                    text,
+                    youdao_lang_map.get(source_lang, source_lang),
+                    youdao_lang_map.get(target_lang, target_lang)
+                )
+                if youdao_result and 'translation' in youdao_result:
+                    translations.append(youdao_result['translation'][0])
+                    confidence_scores.append(0.8)  # 有道翻译默认置信度
             except Exception as e:
-                print(f"Microsoft翻译错误: {str(e)}")
+                print(f"有道翻译错误: {str(e)}")
+        
+        # 4. 尝试使用Azure翻译
+        if self.azure_key:
+            try:
+                azure_result = self.azure_translate(
+                    text,
+                    source_lang,  # Azure使用标准语言代码
+                    target_lang
+                )
+                if azure_result:
+                    translations.append(azure_result['text'])
+                    confidence_scores.append(azure_result.get('confidence', 0.7))
+            except Exception as e:
+                print(f"Azure翻译错误: {str(e)}")
+        
+        # 如果有多个翻译结果，选择置信度最高的
+        if translations:
+            best_index = confidence_scores.index(max(confidence_scores))
+            best_translation = translations[best_index]
             
-            return None
+            # 更新上下文
+            self.context.add_context(text, best_translation)
             
+            return {
+                'text': best_translation,
+                'detected_language': source_lang,
+                'confidence': confidence_scores[best_index],
+                'source': ['百度翻译', '有道翻译', 'Azure翻译'][best_index]
+            }
+        
+        return None
+    
+    def baidu_translate(self, text, from_lang, to_lang):
+        """调用百度翻译API"""
+        try:
+            url = 'http://api.fanyi.baidu.com/api/trans/vip/translate'
+            salt = str(random.randint(32768, 65536))
+            sign = hashlib.md5((self.baidu_app_id + text + salt + self.baidu_secret_key).encode()).hexdigest()
+            
+            params = {
+                'q': text,
+                'from': from_lang,
+                'to': to_lang,
+                'appid': self.baidu_app_id,
+                'salt': salt,
+                'sign': sign
+            }
+            
+            response = requests.get(url, params=params)
+            return response.json()
         except Exception as e:
-            print(f"翻译错误: {str(e)}")
+            print(f"百度翻译请求错误: {str(e)}")
+            return None
+    
+    def youdao_translate(self, text, from_lang, to_lang):
+        """调用有道翻译API"""
+        try:
+            url = 'https://openapi.youdao.com/api'
+            salt = str(int(time.time() * 1000))
+            sign_str = self.youdao_app_key + text + salt + self.youdao_app_secret
+            sign = hashlib.md5(sign_str.encode()).hexdigest()
+            
+            params = {
+                'q': text,
+                'from': from_lang,
+                'to': to_lang,
+                'appKey': self.youdao_app_key,
+                'salt': salt,
+                'sign': sign
+            }
+            
+            response = requests.get(url, params=params)
+            return response.json()
+        except Exception as e:
+            print(f"有道翻译请求错误: {str(e)}")
+            return None
+    
+    def azure_translate(self, text, from_lang, to_lang):
+        """调用Azure翻译API"""
+        try:
+            url = f"{self.azure_endpoint}/translate"
+            params = {
+                'api-version': '3.0',
+                'from': from_lang,
+                'to': to_lang
+            }
+            headers = {
+                'Ocp-Apim-Subscription-Key': self.azure_key,
+                'Ocp-Apim-Subscription-Region': self.azure_region,
+                'Content-type': 'application/json'
+            }
+            body = [{'text': text}]
+            
+            response = requests.post(url, params=params, headers=headers, json=body)
+            response.raise_for_status()
+            
+            result = response.json()
+            if result and len(result) > 0:
+                return {
+                    'text': result[0]['translations'][0]['text'],
+                    'confidence': result[0].get('detectedLanguage', {}).get('score', 0.7)
+                }
+            return None
+        except Exception as e:
+            print(f"Azure翻译请求错误: {str(e)}")
             return None
     
     def init_ui(self):
@@ -234,6 +335,41 @@ class VoiceTranslator:
             variable=self.auto_detect
         )
         self.auto_detect_cb.pack(side=tk.LEFT, padx=5)
+        
+        # 添加文本输入区域（使用LabelFrame使其更明显）
+        input_labelframe = ttk.LabelFrame(left_frame, text="文本输入区域")
+        input_labelframe.pack(fill=tk.X, pady=5, padx=5)
+        
+        frame_input = ttk.Frame(input_labelframe)
+        frame_input.pack(fill=tk.X, pady=5, padx=5)
+        
+        # 创建带滚动条的文本输入区域
+        input_scroll = ttk.Scrollbar(frame_input)
+        input_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.input_area = tk.Text(frame_input, height=4, undo=True)
+        self.input_area.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # 连接滚动条和文本区域
+        self.input_area.config(yscrollcommand=input_scroll.set)
+        input_scroll.config(command=self.input_area.yview)
+        
+        # 添加翻译按钮和快捷键提示
+        button_frame = ttk.Frame(input_labelframe)
+        button_frame.pack(fill=tk.X, pady=(0, 5), padx=5)
+        
+        shortcut_label = ttk.Label(button_frame, text="快捷键: Ctrl+Enter", font=('Arial', 8))
+        shortcut_label.pack(side=tk.LEFT)
+        
+        self.translate_button = ttk.Button(
+            button_frame,
+            text='翻译文本',
+            command=self.translate_input_text
+        )
+        self.translate_button.pack(side=tk.RIGHT)
+        
+        # 添加快捷键绑定
+        self.input_area.bind('<Control-Return>', lambda e: self.translate_input_text())
         
         # 麦克风选择
         frame_mic = ttk.Frame(left_frame)
@@ -285,11 +421,13 @@ class VoiceTranslator:
         ttk.Label(right_frame, text="历史记录", font=('Arial', 12, 'bold')).pack(pady=5)
         self.history_area = tk.Text(right_frame, width=30, height=30)
         self.history_area.pack(fill=tk.BOTH, expand=True)
+        self.update_history_display()
         
     def update_history_display(self):
         """更新历史记录显示"""
         self.history_area.delete(1.0, tk.END)
-        for text, translation in reversed(self.context.get_context()):
+        history = self.context.get_context()
+        for text, translation in reversed(history):  # 显示最近的记录
             self.history_area.insert(tk.END, f"原文: {text}\n")
             self.history_area.insert(tk.END, f"译文: {translation}\n")
             self.history_area.insert(tk.END, "-" * 30 + "\n")
@@ -344,13 +482,6 @@ class VoiceTranslator:
             self.text_area.insert(tk.END, f"语音输出错误: {str(e)}\n")
             self.text_area.see(tk.END)
     
-    def play_beep(self, frequency, duration):
-        """播放提示音"""
-        try:
-            winsound.Beep(frequency, duration)
-        except Exception as e:
-            print(f"播放提示音失败: {str(e)}")
-    
     def toggle_recording(self):
         if not self.is_recording:
             try:
@@ -362,10 +493,6 @@ class VoiceTranslator:
                 
                 self.is_recording = True
                 self.record_button.configure(text='停止录音')
-                # 播放开始录音提示音
-                self.play_beep(*self.start_beep)
-                self.add_message('update_text', text="开始录音...\n")
-                
                 self.recording_thread = threading.Thread(target=self.record_audio)
                 self.recording_thread.start()
                 
@@ -374,112 +501,193 @@ class VoiceTranslator:
                 self.is_recording = False
                 self.record_button.configure(text='开始录音')
         else:
-            self.stop_recording()
-    
-    def stop_recording(self):
-        """停止录音"""
-        if self.is_recording:
             self.is_recording = False
             self.record_button.configure(text='开始录音')
-            # 播放停止录音提示音
-            self.play_beep(*self.stop_beep)
-            self.add_message('update_text', text="停止录音...\n")
-    
-    def check_auto_stop(self):
-        """检查是否需要自动停止录音"""
-        if self.is_recording and time.time() - self.last_audio_time > self.auto_stop_delay:
-            self.stop_recording()
     
     def record_audio(self):
         try:
             with self.current_mic as source:
-                # 设置更短的超时时间
-                self.recognizer.pause_threshold = 0.5  # 降低停顿阈值
-                self.recognizer.dynamic_energy_threshold = True  # 动态能量阈值
-                
                 while self.is_recording:
                     try:
-                        self.add_message('update_text', text="正在听取语音...\n")
+                        self.text_area.insert(tk.END, "正在听取语音...\n")
+                        self.text_area.see(tk.END)
                         
-                        # 添加超时控制
-                        try:
-                            audio = self.recognizer.listen(source, timeout=2, phrase_time_limit=5)
-                            # 更新最后一次检测到音频的时间
-                            self.last_audio_time = time.time()
-                            # 启动自动停止检查
-                            self.window.after(int(self.auto_stop_delay * 1000), self.check_auto_stop)
-                        except sr.WaitTimeoutError:
-                            continue
+                        audio = self.recognizer.listen(source, timeout=1, phrase_time_limit=5)
                         
                         # 获取源语言和文本
                         if self.auto_detect.get():
-                            try:
-                                detected_lang, text = self.detect_language(audio)
-                                if detected_lang:
-                                    self.add_message('set_source_lang', lang=detected_lang)
-                                else:
-                                    # 如果检测失败，使用选定的源语言
-                                    source_lang = self.supported_languages[self.source_lang.get()]
-                                    text = self.recognizer.recognize_google(audio, language=source_lang)
-                            except Exception as e:
-                                self.add_message('update_text', text=f"语言检测失败: {str(e)}\n")
-                                continue
-                        else:
-                            try:
+                            detected_lang, text = self.detect_language(audio)
+                            if detected_lang:
+                                self.source_lang.set(detected_lang)
+                            else:
+                                # 如果检测失败，使用选定的源语言
                                 source_lang = self.supported_languages[self.source_lang.get()]
                                 text = self.recognizer.recognize_google(audio, language=source_lang)
-                            except Exception as e:
-                                self.add_message('update_text', text=f"语音识别失败: {str(e)}\n")
-                                continue
+                        else:
+                            source_lang = self.supported_languages[self.source_lang.get()]
+                            text = self.recognizer.recognize_google(audio, language=source_lang)
                         
                         if not text:
                             continue
                             
                         # 翻译文本
-                        try:
-                            source_lang = self.supported_languages[self.source_lang.get()]
-                            target_lang = self.supported_languages[self.target_lang.get()]
-                            
-                            translation_result = self.translate_text(text, source_lang, target_lang)
-                            
-                            if translation_result:
-                                translated_text = translation_result['text']
-                                confidence = translation_result['confidence']
-                                source = translation_result['source']
-                                
-                                # 更新UI
-                                result_text = f"原文 ({self.source_lang.get()}): {text}\n"
-                                result_text += f"译文 ({self.target_lang.get()}): {translated_text}\n"
-                                result_text += f"翻译源: {source}\n"
-                                if confidence:
-                                    result_text += f"置信度: {confidence:.2%}\n"
-                                result_text += "\n"
-                                
-                                self.add_message('update_text', text=result_text)
-                                
-                                # 更新历史记录
-                                self.context.add_context(text, translated_text)
-                                self.add_message('update_history')
-                                
-                                # 语音输出翻译结果
-                                self.add_message('speak', text=translated_text, lang=target_lang)
-                            else:
-                                self.add_message('update_text', text="翻译失败，请重试...\n")
-                        except Exception as e:
-                            self.add_message('update_text', text=f"翻译过程错误: {str(e)}\n")
-                            continue
+                        source_lang = self.supported_languages[self.source_lang.get()]
+                        target_lang = self.supported_languages[self.target_lang.get()]
                         
+                        translation_result = self.translate_text(text, source_lang, target_lang)
+                        
+                        if translation_result:
+                            translated_text = translation_result['text']
+                            confidence = translation_result['confidence']
+                            
+                            # 更新UI
+                            result_text = f"原文 ({self.source_lang.get()}): {text}\n"
+                            result_text += f"译文 ({self.target_lang.get()}): {translated_text}\n"
+                            if confidence:
+                                result_text += f"识别置信度: {confidence:.2%}\n"
+                            result_text += "\n"
+                            
+                            self.text_area.insert(tk.END, result_text)
+                            self.text_area.see(tk.END)
+                            
+                            # 保存历史记录
+                            self.save_history(
+                                text,
+                                translated_text,
+                                self.source_lang.get(),
+                                self.target_lang.get()
+                            )
+                            self.update_history_display()
+                            
+                            # 语音输出翻译结果
+                            self.speak_text(translated_text, target_lang)
+                        else:
+                            self.text_area.insert(tk.END, "翻译失败，请重试...\n")
+                            self.text_area.see(tk.END)
+                        
+                    except sr.WaitTimeoutError:
+                        continue
                     except sr.UnknownValueError:
-                        self.add_message('update_text', text="未能识别语音，请重试...\n")
-                        continue
+                        self.text_area.insert(tk.END, "未能识别语音，请重试...\n")
+                        self.text_area.see(tk.END)
                     except Exception as e:
-                        self.add_message('update_text', text=f"错误: {str(e)}\n")
-                        continue
-                        
+                        self.text_area.insert(tk.END, f"错误: {str(e)}\n")
+                        self.text_area.see(tk.END)
         except Exception as e:
             messagebox.showerror("错误", f"录音过程出错：{str(e)}")
             self.is_recording = False
             self.record_button.configure(text='开始录音')
+    
+    def translate_input_text(self):
+        """处理文本输入翻译"""
+        try:
+            # 获取输入文本
+            text = self.input_area.get("1.0", tk.END).strip()
+            if not text:
+                messagebox.showinfo("提示", "请输入要翻译的文本")
+                return
+            
+            # 禁用翻译按钮，防止重复点击
+            self.translate_button.configure(state='disabled')
+            
+            # 显示翻译中提示
+            self.text_area.insert(tk.END, "正在翻译...\n")
+            self.text_area.see(tk.END)
+            
+            # 在新线程中执行翻译
+            threading.Thread(target=self._async_translate_text, args=(text,), daemon=True).start()
+            
+        except Exception as e:
+            error_msg = f"翻译错误: {str(e)}\n"
+            self.text_area.insert(tk.END, error_msg)
+            self.text_area.see(tk.END)
+            self.translate_button.configure(state='normal')
+
+    def _async_translate_text(self, text):
+        """异步执行翻译过程"""
+        try:
+            # 获取源语言和目标语言
+            source_lang = self.supported_languages[self.source_lang.get()]
+            target_lang = self.supported_languages[self.target_lang.get()]
+            
+            # 如果启用了自动检测，尝试检测语言
+            if self.auto_detect.get():
+                try:
+                    # 使用Google翻译的语言检测功能
+                    translator = GoogleTranslator()
+                    detected_info = translator.detect(text)
+                    if detected_info and detected_info.lang:
+                        # 在支持的语言中查找匹配的语言代码
+                        for lang_name, lang_code in self.supported_languages.items():
+                            if lang_code == detected_info.lang:
+                                self.window.after(0, lambda: self.source_lang.set(lang_name))
+                                source_lang = lang_code
+                                break
+                except Exception as e:
+                    print(f"语言检测错误: {str(e)}")
+            
+            # 优先使用Google翻译（最快）
+            try:
+                translator = GoogleTranslator()
+                translation = translator.translate(text, src=source_lang, dest=target_lang)
+                if translation and translation.text:
+                    self._handle_translation_result({
+                        'text': translation.text,
+                        'confidence': 0.9,
+                        'source': 'Google翻译',
+                        'detected_language': source_lang
+                    }, text, target_lang)
+                    return
+            except Exception as e:
+                print(f"Google翻译错误: {str(e)}")
+            
+            # 如果Google翻译失败，尝试其他翻译源
+            translation_result = self.translate_text(text, source_lang, target_lang)
+            if translation_result:
+                self._handle_translation_result(translation_result, text, target_lang)
+            else:
+                self.window.after(0, lambda: self.text_area.insert(tk.END, "翻译失败，请重试...\n"))
+                self.window.after(0, lambda: self.text_area.see(tk.END))
+            
+        except Exception as e:
+            error_msg = f"翻译错误: {str(e)}\n"
+            self.window.after(0, lambda: self.text_area.insert(tk.END, error_msg))
+            self.window.after(0, lambda: self.text_area.see(tk.END))
+        finally:
+            # 恢复翻译按钮状态
+            self.window.after(0, lambda: self.translate_button.configure(state='normal'))
+
+    def _handle_translation_result(self, result, original_text, target_lang):
+        """处理翻译结果"""
+        def update_ui():
+            translated_text = result['text']
+            confidence = result['confidence']
+            source = result['source']
+            
+            # 更新UI
+            result_text = f"原文 ({self.source_lang.get()}): {original_text}\n"
+            result_text += f"译文 ({self.target_lang.get()}): {translated_text}\n"
+            result_text += f"翻译源: {source}\n"
+            if confidence:
+                result_text += f"置信度: {confidence:.2%}\n"
+            result_text += "\n"
+            
+            self.text_area.insert(tk.END, result_text)
+            self.text_area.see(tk.END)
+            
+            # 更新历史记录
+            self.context.add_context(original_text, translated_text)
+            self.update_history_display()
+            
+            # 语音输出翻译结果
+            if self.voice_output_enabled.get():
+                self.speak_text(translated_text, target_lang)
+            
+            # 清空输入框
+            self.input_area.delete("1.0", tk.END)
+        
+        # 在主线程中更新UI
+        self.window.after(0, update_ui)
 
     def run(self):
         self.window.mainloop()
