@@ -133,52 +133,101 @@ class VoiceTranslator:
         """使用多个翻译源进行翻译"""
         translations = []
         confidence_scores = []
+        translation_sources = []
         
-        # 1. 检查是否有上下文特殊处理
-        context_translation = self.analyze_context(text, self.context.get_context())
-        if context_translation:
+        # 获取选择的翻译源
+        selected_source = self.translation_sources[self.selected_source.get()]
+        
+        # 1. 检查是否是固定短语映射
+        text_stripped = text.strip()
+        if text_stripped in phrase_mapping and target_lang in phrase_mapping[text_stripped]:
             return {
-                'text': context_translation,
+                'text': phrase_mapping[text_stripped][target_lang],
                 'detected_language': source_lang,
                 'confidence': 1.0,
-                'source': 'context'
+                'source': '预定义短语'
             }
         
-        # 2. 尝试使用百度翻译
-        if self.baidu_app_id and self.baidu_secret_key:
+        # 如果不是智能选择模式，只使用选定的翻译源
+        if selected_source != 'auto':
             try:
-                # 百度翻译语言代码映射
-                baidu_lang_map = {
-                    'zh-CN': 'zh',
-                    'zh-TW': 'cht',
-                    'en': 'en',
-                    'ja': 'jp',
-                    'ko': 'kor',
-                    'fr': 'fra',
-                    'de': 'de',
-                    'es': 'spa',
-                    'ru': 'ru'
-                }
+                if selected_source == 'deepl' and self.deepl_translator:
+                    deepl_lang_map = {
+                        'zh-CN': 'zh',
+                        'zh-TW': 'zh',
+                        'en': 'en-US',
+                        'ja': 'ja',
+                        'ko': 'ko',
+                        'fr': 'fr',
+                        'de': 'de',
+                        'es': 'es',
+                        'ru': 'ru'
+                    }
+                    source_lang_code = deepl_lang_map.get(source_lang)
+                    target_lang_code = deepl_lang_map.get(target_lang)
+                    if source_lang_code and target_lang_code:
+                        result = self.deepl_translator.translate_text(
+                            text,
+                            source_lang=source_lang_code,
+                            target_lang=target_lang_code
+                        )
+                        if result:
+                            return {
+                                'text': result.text,
+                                'detected_language': source_lang,
+                                'confidence': 0.95,
+                                'source': 'DeepL翻译'
+                            }
                 
-                baidu_result = self.baidu_translate(
-                    text,
-                    baidu_lang_map.get(source_lang, source_lang),
-                    baidu_lang_map.get(target_lang, target_lang)
-                )
-                if baidu_result and 'trans_result' in baidu_result:
-                    translations.append(baidu_result['trans_result'][0]['dst'])
-                    confidence_scores.append(0.8)  # 百度翻译默认置信度
+                elif selected_source == 'google':
+                    translator = GoogleTranslator()
+                    result = translator.translate(text, src=source_lang, dest=target_lang)
+                    if result and result.text:
+                        complexity = len(text.split()) + len([c for c in text if c in ',.!?;:'])
+                        confidence = 0.85 if complexity > 5 else 0.8
+                        return {
+                            'text': result.text,
+                            'detected_language': source_lang,
+                            'confidence': confidence,
+                            'source': '谷歌翻译'
+                        }
+                
+                elif selected_source == 'baidu' and self.baidu_app_id and self.baidu_secret_key:
+                    baidu_result = self.baidu_translate(text, source_lang, target_lang)
+                    if baidu_result and 'trans_result' in baidu_result:
+                        is_chinese = 'zh' in source_lang or 'zh' in target_lang
+                        confidence = 0.9 if is_chinese else 0.75
+                        return {
+                            'text': baidu_result['trans_result'][0]['dst'],
+                            'detected_language': source_lang,
+                            'confidence': confidence,
+                            'source': '百度翻译'
+                        }
+                
+                elif selected_source == 'youdao' and self.youdao_app_key and self.youdao_app_secret:
+                    youdao_result = self.youdao_translate(text, source_lang, target_lang)
+                    if youdao_result and 'translation' in youdao_result:
+                        is_short = len(text.split()) <= 3
+                        confidence = 0.85 if is_short else 0.7
+                        return {
+                            'text': youdao_result['translation'][0],
+                            'detected_language': source_lang,
+                            'confidence': confidence,
+                            'source': '有道翻译'
+                        }
+            
             except Exception as e:
-                print(f"百度翻译错误: {str(e)}")
+                print(f"翻译错误 ({selected_source}): {str(e)}")
+                return None
         
-        # 3. 尝试使用有道翻译
-        if self.youdao_app_key and self.youdao_app_secret:
+        # 智能选择模式：使用所有可用的翻译源
+        # 2. 尝试使用DeepL翻译（高质量但较慢）
+        if self.deepl_translator:
             try:
-                # 有道翻译语言代码映射
-                youdao_lang_map = {
-                    'zh-CN': 'zh-CHS',
-                    'zh-TW': 'zh-CHT',
-                    'en': 'en',
+                deepl_lang_map = {
+                    'zh-CN': 'zh',
+                    'zh-TW': 'zh',
+                    'en': 'en-US',
                     'ja': 'ja',
                     'ko': 'ko',
                     'fr': 'fr',
@@ -187,44 +236,104 @@ class VoiceTranslator:
                     'ru': 'ru'
                 }
                 
-                youdao_result = self.youdao_translate(
-                    text,
-                    youdao_lang_map.get(source_lang, source_lang),
-                    youdao_lang_map.get(target_lang, target_lang)
-                )
+                source_lang_code = deepl_lang_map.get(source_lang)
+                target_lang_code = deepl_lang_map.get(target_lang)
+                
+                if source_lang_code and target_lang_code:
+                    result = self.deepl_translator.translate_text(
+                        text,
+                        source_lang=source_lang_code,
+                        target_lang=target_lang_code
+                    )
+                    if result:
+                        translations.append(result.text)
+                        confidence_scores.append(0.95)  # DeepL通常质量较高
+                        translation_sources.append('DeepL翻译')
+            except Exception as e:
+                print(f"DeepL翻译错误: {str(e)}")
+        
+        # 3. 尝试使用谷歌翻译（速度快）
+        try:
+            translator = GoogleTranslator()
+            result = translator.translate(text, src=source_lang, dest=target_lang)
+            if result and result.text:
+                translations.append(result.text)
+                # 根据文本长度和复杂度调整置信度
+                complexity = len(text.split()) + len([c for c in text if c in ',.!?;:'])
+                confidence = 0.85 if complexity > 5 else 0.8
+                confidence_scores.append(confidence)
+                translation_sources.append('谷歌翻译')
+        except Exception as e:
+            print(f"谷歌翻译错误: {str(e)}")
+        
+        # 4. 尝试使用百度翻译（适合中文）
+        if self.baidu_app_id and self.baidu_secret_key:
+            try:
+                baidu_result = self.baidu_translate(text, source_lang, target_lang)
+                if baidu_result and 'trans_result' in baidu_result:
+                    translations.append(baidu_result['trans_result'][0]['dst'])
+                    # 中文相关翻译给予更高置信度
+                    is_chinese = 'zh' in source_lang or 'zh' in target_lang
+                    confidence = 0.9 if is_chinese else 0.75
+                    confidence_scores.append(confidence)
+                    translation_sources.append('百度翻译')
+            except Exception as e:
+                print(f"百度翻译错误: {str(e)}")
+        
+        # 5. 尝试使用有道翻译（补充）
+        if self.youdao_app_key and self.youdao_app_secret:
+            try:
+                youdao_result = self.youdao_translate(text, source_lang, target_lang)
                 if youdao_result and 'translation' in youdao_result:
                     translations.append(youdao_result['translation'][0])
-                    confidence_scores.append(0.8)  # 有道翻译默认置信度
+                    # 根据文本特征调整置信度
+                    is_short = len(text.split()) <= 3
+                    confidence = 0.85 if is_short else 0.7
+                    confidence_scores.append(confidence)
+                    translation_sources.append('有道翻译')
             except Exception as e:
                 print(f"有道翻译错误: {str(e)}")
         
-        # 4. 尝试使用Azure翻译
-        if self.azure_key:
-            try:
-                azure_result = self.azure_translate(
-                    text,
-                    source_lang,  # Azure使用标准语言代码
-                    target_lang
-                )
-                if azure_result:
-                    translations.append(azure_result['text'])
-                    confidence_scores.append(azure_result.get('confidence', 0.7))
-            except Exception as e:
-                print(f"Azure翻译错误: {str(e)}")
-        
-        # 如果有多个翻译结果，选择置信度最高的
+        # 如果有多个翻译结果，进行智能合并
         if translations:
-            best_index = confidence_scores.index(max(confidence_scores))
-            best_translation = translations[best_index]
+            # 计算每个翻译的出现次数
+            translation_counts = {}
+            for t in translations:
+                translation_counts[t] = translation_counts.get(t, 0) + 1
             
-            # 更新上下文
-            self.context.add_context(text, best_translation)
+            # 选择最佳翻译
+            best_translation = None
+            best_confidence = 0
+            best_source = None
+            
+            for i, translation in enumerate(translations):
+                # 基础置信度
+                base_confidence = confidence_scores[i]
+                
+                # 根据多个翻译源的一致性调整置信度
+                agreement_bonus = (translation_counts[translation] - 1) * 0.1
+                
+                # 根据翻译源的特点调整置信度
+                source_weight = {
+                    'DeepL翻译': 1.1,
+                    '谷歌翻译': 1.0,
+                    '百度翻译': 1.0 if 'zh' in source_lang or 'zh' in target_lang else 0.9,
+                    '有道翻译': 0.9
+                }.get(translation_sources[i], 1.0)
+                
+                # 计算最终置信度
+                final_confidence = min(1.0, base_confidence * source_weight + agreement_bonus)
+                
+                if final_confidence > best_confidence:
+                    best_confidence = final_confidence
+                    best_translation = translation
+                    best_source = translation_sources[i]
             
             return {
                 'text': best_translation,
                 'detected_language': source_lang,
-                'confidence': confidence_scores[best_index],
-                'source': ['百度翻译', '有道翻译', 'Azure翻译'][best_index]
+                'confidence': best_confidence,
+                'source': best_source
             }
         
         return None
@@ -327,6 +436,19 @@ class VoiceTranslator:
         self.target_lang.set('英语')
         self.target_lang.pack(side=tk.LEFT, padx=5)
         
+        # 翻译源选择框
+        ttk.Label(frame_langs, text="翻译源：").pack(side=tk.LEFT)
+        self.translation_sources = {
+            '智能选择': 'auto',
+            'DeepL翻译': 'deepl',
+            '谷歌翻译': 'google',
+            '百度翻译': 'baidu',
+            '有道翻译': 'youdao'
+        }
+        self.selected_source = ttk.Combobox(frame_langs, values=list(self.translation_sources.keys()))
+        self.selected_source.set('智能选择')
+        self.selected_source.pack(side=tk.LEFT, padx=5)
+        
         # 自动检测语言复选框
         self.auto_detect = tk.BooleanVar(value=True)
         self.auto_detect_cb = ttk.Checkbutton(
@@ -336,7 +458,64 @@ class VoiceTranslator:
         )
         self.auto_detect_cb.pack(side=tk.LEFT, padx=5)
         
-        # 添加文本输入区域（使用LabelFrame使其更明显）
+        # 文本显示区域（翻译结果）
+        result_labelframe = ttk.LabelFrame(left_frame, text="翻译结果")
+        result_labelframe.pack(fill=tk.BOTH, expand=True, pady=5, padx=5)
+        
+        # 创建带滚动条的翻译结果区域
+        result_scroll = ttk.Scrollbar(result_labelframe)
+        result_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        self.text_area = tk.Text(result_labelframe, height=15, undo=True)
+        self.text_area.pack(fill=tk.BOTH, expand=True)
+        
+        # 连接滚动条和文本区域
+        self.text_area.config(yscrollcommand=result_scroll.set)
+        result_scroll.config(command=self.text_area.yview)
+        
+        # 麦克风和语音设置
+        settings_frame = ttk.Frame(left_frame)
+        settings_frame.pack(fill=tk.X, pady=5)
+        
+        # 麦克风选择
+        frame_mic = ttk.Frame(settings_frame)
+        frame_mic.pack(side=tk.LEFT, padx=5)
+        ttk.Label(frame_mic, text="选择麦克风：").pack(side=tk.LEFT)
+        self.mic_select = ttk.Combobox(frame_mic, values=self.mic_list)
+        if self.mic_list:
+            self.mic_select.set(self.mic_list[0])
+        self.mic_select.pack(side=tk.LEFT, padx=5)
+        
+        # 语音输出设置
+        frame_voice = ttk.Frame(settings_frame)
+        frame_voice.pack(side=tk.LEFT, padx=5)
+        
+        self.voice_output_enabled = tk.BooleanVar(value=True)
+        self.voice_checkbox = ttk.Checkbutton(
+            frame_voice,
+            text="启用语音输出",
+            variable=self.voice_output_enabled
+        )
+        self.voice_checkbox.pack(side=tk.LEFT, padx=5)
+        
+        if self.voice_list:
+            ttk.Label(frame_voice, text="选择声音：").pack(side=tk.LEFT)
+            self.voice_select = ttk.Combobox(frame_voice, values=self.voice_list)
+            self.voice_select.set(self.voice_list[0])
+            self.voice_select.pack(side=tk.LEFT, padx=5)
+            
+            ttk.Label(frame_voice, text="语速：").pack(side=tk.LEFT)
+            self.rate_scale = ttk.Scale(
+                frame_voice,
+                from_=50,
+                to=300,
+                orient=tk.HORIZONTAL,
+                length=100
+            )
+            self.rate_scale.set(150)
+            self.rate_scale.pack(side=tk.LEFT, padx=5)
+        
+        # 添加文本输入区域
         input_labelframe = ttk.LabelFrame(left_frame, text="文本输入区域")
         input_labelframe.pack(fill=tk.X, pady=5, padx=5)
         
@@ -371,51 +550,9 @@ class VoiceTranslator:
         # 添加快捷键绑定
         self.input_area.bind('<Control-Return>', lambda e: self.translate_input_text())
         
-        # 麦克风选择
-        frame_mic = ttk.Frame(left_frame)
-        frame_mic.pack(pady=5)
-        ttk.Label(frame_mic, text="选择麦克风：").pack(side=tk.LEFT)
-        self.mic_select = ttk.Combobox(frame_mic, values=self.mic_list)
-        if self.mic_list:
-            self.mic_select.set(self.mic_list[0])
-        self.mic_select.pack(side=tk.LEFT, padx=5)
-        
-        # 语音输出设置
-        frame_voice = ttk.Frame(left_frame)
-        frame_voice.pack(pady=5)
-        
-        self.voice_output_enabled = tk.BooleanVar(value=True)
-        self.voice_checkbox = ttk.Checkbutton(
-            frame_voice,
-            text="启用语音输出",
-            variable=self.voice_output_enabled
-        )
-        self.voice_checkbox.pack(side=tk.LEFT, padx=5)
-        
-        if self.voice_list:
-            ttk.Label(frame_voice, text="选择声音：").pack(side=tk.LEFT)
-            self.voice_select = ttk.Combobox(frame_voice, values=self.voice_list)
-            self.voice_select.set(self.voice_list[0])
-            self.voice_select.pack(side=tk.LEFT, padx=5)
-            
-            ttk.Label(frame_voice, text="语速：").pack(side=tk.LEFT)
-            self.rate_scale = ttk.Scale(
-                frame_voice,
-                from_=50,
-                to=300,
-                orient=tk.HORIZONTAL,
-                length=100
-            )
-            self.rate_scale.set(150)
-            self.rate_scale.pack(side=tk.LEFT, padx=5)
-        
-        # 文本显示区域
-        self.text_area = tk.Text(left_frame, height=15)
-        self.text_area.pack(pady=10, fill=tk.BOTH, expand=True)
-        
         # 录音按钮
         self.record_button = ttk.Button(left_frame, text='开始录音', command=self.toggle_recording)
-        self.record_button.pack(pady=10)
+        self.record_button.pack(pady=5)
         
         # 右侧：历史记录
         ttk.Label(right_frame, text="历史记录", font=('Arial', 12, 'bold')).pack(pady=5)
@@ -433,34 +570,38 @@ class VoiceTranslator:
             self.history_area.insert(tk.END, "-" * 30 + "\n")
     
     def detect_language(self, audio):
-        """检测音频语言"""
+        """检测音频语言，返回语言和置信度"""
         try:
             # 尝试用不同的语言识别
-            best_result = None
-            max_confidence = 0
-            detected_lang = None
+            results = []
             
             for lang_name, lang_code in self.supported_languages.items():
                 try:
                     text = self.recognizer.recognize_google(audio, language=lang_code, show_all=True)
                     if text and isinstance(text, dict) and text.get('alternative'):
-                        confidence = text['alternative'][0].get('confidence', 0)
-                        if confidence > max_confidence:
-                            max_confidence = confidence
-                            best_result = text['alternative'][0]['transcript']
-                            detected_lang = lang_name
+                        for alt in text['alternative']:
+                            confidence = alt.get('confidence', 0)
+                            transcript = alt.get('transcript', '')
+                            if transcript:
+                                results.append({
+                                    'lang': lang_name,
+                                    'text': transcript,
+                                    'confidence': confidence
+                                })
                 except:
                     continue
             
-            if detected_lang and best_result:
-                return detected_lang, best_result
+            # 按置信度排序
+            results.sort(key=lambda x: x['confidence'], reverse=True)
             
-            # 如果所有语言都识别失败，返回None
-            return None, None
+            if results:
+                return results[0]['lang'], results[0]['text'], results[0]['confidence']
+            
+            return None, None, 0
             
         except Exception as e:
             print(f"语言检测错误: {str(e)}")
-            return None, None
+            return None, None, 0
     
     def speak_text(self, text, lang):
         """使用语音输出文本"""
@@ -504,6 +645,94 @@ class VoiceTranslator:
             self.is_recording = False
             self.record_button.configure(text='开始录音')
     
+    def smart_speech_correction(self, text, language):
+        """智能语音识别纠正"""
+        # 常见的发音相近词对
+        similar_words = {
+            'en': {  # 英语发音相近词
+                'wall': ['war', 'walk', 'wool'],
+                'war': ['wall', 'warm', 'ward'],
+                'piece': ['peace', 'peas'],
+                'peace': ['piece', 'peas'],
+                'right': ['write', 'ride'],
+                'write': ['right', 'ride'],
+                'there': ['their', 'they\'re'],
+                'their': ['there', 'they\'re'],
+                'here': ['hear', 'hair'],
+                'hear': ['here', 'hair'],
+                'buy': ['by', 'bye'],
+                'by': ['buy', 'bye'],
+                'know': ['no', 'now'],
+                'no': ['know', 'now'],
+                'sea': ['see', 'she'],
+                'see': ['sea', 'she']
+            },
+            'zh-CN': {  # 中文发音相近词
+                '是': ['事', '市', '式'],
+                '事': ['是', '市', '式'],
+                '在': ['再', '载'],
+                '再': ['在', '载'],
+                '给': ['及', '级'],
+                '及': ['给', '级'],
+                '和': ['河', '合'],
+                '河': ['和', '合'],
+                '地': ['的', '得'],
+                '的': ['地', '得']
+            }
+        }
+        
+        # 语言特定的上下文关键词
+        context_keywords = {
+            'en': {
+                'wall': ['build', 'brick', 'stone', 'paint', 'house', 'room'],
+                'war': ['fight', 'battle', 'army', 'soldier', 'peace'],
+                'peace': ['war', 'treaty', 'agreement', 'quiet', 'calm'],
+                'piece': ['part', 'slice', 'portion', 'cake', 'puzzle']
+            },
+            'zh-CN': {
+                '是': ['对', '正确', '确实', '就是'],
+                '事': ['工作', '办', '处理', '事情'],
+                '在': ['位于', '存在', '正在'],
+                '再': ['还要', '又', '重新']
+            }
+        }
+        
+        words = text.lower().split()
+        corrected_words = []
+        
+        # 获取最近的上下文
+        recent_texts = [t[0].lower() for t in self.context.get_context()[-3:]]
+        context_text = ' '.join(recent_texts + [text.lower()])
+        
+        for word in words:
+            if language in similar_words and word in similar_words[language]:
+                candidates = similar_words[language][word]
+                best_word = word
+                max_score = 0
+                
+                for candidate in candidates:
+                    score = 0
+                    # 检查上下文关键词
+                    if language in context_keywords and candidate in context_keywords[language]:
+                        for keyword in context_keywords[language][candidate]:
+                            if keyword in context_text:
+                                score += 1
+                    
+                    # 检查最近的翻译历史
+                    for hist_text in recent_texts:
+                        if candidate in hist_text:
+                            score += 0.5
+                    
+                    if score > max_score:
+                        max_score = score
+                        best_word = candidate
+                
+                corrected_words.append(best_word)
+            else:
+                corrected_words.append(word)
+        
+        return ' '.join(corrected_words)
+
     def record_audio(self):
         try:
             with self.current_mic as source:
@@ -516,9 +745,10 @@ class VoiceTranslator:
                         
                         # 获取源语言和文本
                         if self.auto_detect.get():
-                            detected_lang, text = self.detect_language(audio)
+                            detected_lang, text, speech_confidence = self.detect_language(audio)
                             if detected_lang:
                                 self.source_lang.set(detected_lang)
+                                self.text_area.insert(tk.END, f"语音识别置信度: {speech_confidence:.2%}\n")
                             else:
                                 # 如果检测失败，使用选定的源语言
                                 source_lang = self.supported_languages[self.source_lang.get()]
@@ -529,22 +759,32 @@ class VoiceTranslator:
                         
                         if not text:
                             continue
+                        
+                        # 智能纠正识别结果
+                        source_lang = self.supported_languages[self.source_lang.get()]
+                        corrected_text = self.smart_speech_correction(text, source_lang)
+                        
+                        # 如果纠正后的文本与原文不同，显示提示
+                        if corrected_text != text:
+                            self.text_area.insert(tk.END, f"原始识别: {text}\n")
+                            self.text_area.insert(tk.END, f"智能纠正: {corrected_text}\n")
+                            text = corrected_text
                             
                         # 翻译文本
-                        source_lang = self.supported_languages[self.source_lang.get()]
                         target_lang = self.supported_languages[self.target_lang.get()]
-                        
                         translation_result = self.translate_text(text, source_lang, target_lang)
                         
                         if translation_result:
                             translated_text = translation_result['text']
                             confidence = translation_result['confidence']
+                            source = translation_result['source']
                             
                             # 更新UI
                             result_text = f"原文 ({self.source_lang.get()}): {text}\n"
                             result_text += f"译文 ({self.target_lang.get()}): {translated_text}\n"
+                            result_text += f"翻译源: {source}\n"
                             if confidence:
-                                result_text += f"识别置信度: {confidence:.2%}\n"
+                                result_text += f"翻译置信度: {confidence:.2%}\n"
                             result_text += "\n"
                             
                             self.text_area.insert(tk.END, result_text)
@@ -669,7 +909,7 @@ class VoiceTranslator:
             result_text += f"译文 ({self.target_lang.get()}): {translated_text}\n"
             result_text += f"翻译源: {source}\n"
             if confidence:
-                result_text += f"置信度: {confidence:.2%}\n"
+                result_text += f"翻译置信度: {confidence:.2%}\n"
             result_text += "\n"
             
             self.text_area.insert(tk.END, result_text)
