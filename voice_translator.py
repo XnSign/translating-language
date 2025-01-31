@@ -14,6 +14,7 @@ import random
 from googletrans import Translator as GoogleTranslator
 import deepl
 import uuid
+import locale
 
 class TranslationContext:
     def __init__(self, max_history=5):
@@ -324,8 +325,16 @@ class VoiceTranslator:
             }
         }
         
-        # 默认使用中文界面
-        self.current_ui_lang = '简体中文'
+        # 获取系统语言并设置默认界面语言
+        try:
+            system_lang = locale.getdefaultlocale()[0].lower()
+            if system_lang.startswith('zh'):
+                self.current_ui_lang = '简体中文'
+            else:
+                self.current_ui_lang = 'English'
+        except:
+            # 如果无法获取系统语言，默认使用英文
+            self.current_ui_lang = 'English'
         
         self.window = tk.Tk()
         self.window.title(self.ui_languages[self.current_ui_lang]['title'])
