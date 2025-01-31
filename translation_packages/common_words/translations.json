@@ -1,0 +1,62 @@
+{
+    "hello": {
+        "translations": {
+            "zh-CN": "你好",
+            "en": "hello",
+            "ja": "こんにちは",
+            "ko": "안녕하세요",
+            "fr": "bonjour",
+            "de": "hallo",
+            "es": "hola",
+            "ru": "здравствуйте"
+        },
+        "pos": "interjection",
+        "frequency": 100,
+        "category": "greetings",
+        "examples": {
+            "en": [
+                "Hello, how are you?",
+                "Hello, nice to meet you!"
+            ],
+            "zh-CN": [
+                "你好，最近好吗？",
+                "你好，很高兴认识你！"
+            ]
+        },
+        "alternatives": {
+            "zh-CN": ["您好"],
+            "en": ["hi", "hey"]
+        },
+        "related": ["hi", "greeting", "welcome"]
+    },
+    "thank": {
+        "translations": {
+            "zh-CN": "感谢",
+            "en": "thank",
+            "ja": "ありがとう",
+            "ko": "감사합니다",
+            "fr": "merci",
+            "de": "danke",
+            "es": "gracias",
+            "ru": "спасибо"
+        },
+        "pos": "verb",
+        "frequency": 95,
+        "category": "courtesy",
+        "examples": {
+            "en": [
+                "Thank you very much!",
+                "I want to thank you for your help."
+            ],
+            "zh-CN": [
+                "非常感谢你！",
+                "我想感谢你的帮助。"
+            ]
+        },
+        "alternatives": {
+            "zh-CN": ["谢谢", "致谢"],
+            "en": ["appreciate", "acknowledge"]
+        },
+        "related": ["gratitude", "appreciate", "thankful"]
+    }
+} 
