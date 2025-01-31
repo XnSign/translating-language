@@ -139,7 +139,7 @@ class VoiceTranslator:
         # 界面语言设置
         self.ui_languages = {
             '简体中文': {
-                'title': '留生机demo',
+                'title': '语音翻译助手',
                 'ui_language': '界面语言：',
                 'source_lang': '源语言：',
                 'target_lang': '目标语言：',
@@ -231,7 +231,7 @@ class VoiceTranslator:
                 }
             },
             'English': {
-                'title': 'Voice Translator Demo',
+                'title': 'Voice Translator',
                 'ui_language': 'UI Language:',
                 'source_lang': 'Source Language:',
                 'target_lang': 'Target Language:',
@@ -934,8 +934,13 @@ class VoiceTranslator:
         # 麦克风选择
         frame_mic = ttk.Frame(settings_frame)
         frame_mic.pack(side=tk.LEFT, padx=5)
-        ttk.Label(frame_mic, text=self.ui_languages[self.current_ui_lang]['select_mic']).pack(side=tk.LEFT)
-        self.mic_select = ttk.Combobox(frame_mic, values=self.mic_list)
+        
+        # 麦克风选择标签
+        mic_label = ttk.Label(frame_mic, text=self.ui_languages[self.current_ui_lang]['select_mic'])
+        mic_label.pack(side=tk.LEFT)
+        
+        # 麦克风选择下拉框
+        self.mic_select = ttk.Combobox(frame_mic, values=self.mic_list, width=25)
         if self.mic_list:
             self.mic_select.set(self.mic_list[0])
         self.mic_select.pack(side=tk.LEFT, padx=5)
@@ -944,6 +949,7 @@ class VoiceTranslator:
         frame_voice = ttk.Frame(settings_frame)
         frame_voice.pack(side=tk.LEFT, padx=5)
         
+        # 启用语音输出复选框
         self.voice_output_enabled = tk.BooleanVar(value=True)
         self.voice_checkbox = ttk.Checkbutton(
             frame_voice,
@@ -952,13 +958,22 @@ class VoiceTranslator:
         )
         self.voice_checkbox.pack(side=tk.LEFT, padx=5)
         
+        # 语音选择和速度设置
         if self.voice_list:
-            ttk.Label(frame_voice, text=self.ui_languages[self.current_ui_lang]['select_voice']).pack(side=tk.LEFT)
-            self.voice_select = ttk.Combobox(frame_voice, values=self.voice_list)
+            # 语音选择标签
+            voice_label = ttk.Label(frame_voice, text=self.ui_languages[self.current_ui_lang]['select_voice'])
+            voice_label.pack(side=tk.LEFT)
+            
+            # 语音选择下拉框
+            self.voice_select = ttk.Combobox(frame_voice, values=self.voice_list, width=25)
             self.voice_select.set(self.voice_list[0])
             self.voice_select.pack(side=tk.LEFT, padx=5)
             
-            ttk.Label(frame_voice, text=self.ui_languages[self.current_ui_lang]['voice_speed']).pack(side=tk.LEFT)
+            # 语速标签
+            speed_label = ttk.Label(frame_voice, text=self.ui_languages[self.current_ui_lang]['voice_speed'])
+            speed_label.pack(side=tk.LEFT)
+            
+            # 语速滑块
             self.rate_scale = ttk.Scale(
                 frame_voice,
                 from_=50,
@@ -1890,43 +1905,37 @@ class VoiceTranslator:
             self.auto_detect_cb.configure(text=ui_text['auto_detect'])
             self.voice_checkbox.configure(text=ui_text['enable_voice'])
             
-            # 更新标签文本
-            for widget in self.window.winfo_children():
-                if isinstance(widget, ttk.Frame):
-                    for child in widget.winfo_children():
-                        if isinstance(child, ttk.Frame):
-                            for grandchild in child.winfo_children():
-                                if isinstance(grandchild, ttk.Label):
-                                    if grandchild.cget('text') == self.ui_languages[old_lang]['source_lang']:
-                                        grandchild.configure(text=ui_text['source_lang'])
-                                    elif grandchild.cget('text') == self.ui_languages[old_lang]['target_lang']:
-                                        grandchild.configure(text=ui_text['target_lang'])
-                                    elif grandchild.cget('text') == self.ui_languages[old_lang]['trans_source']:
-                                        grandchild.configure(text=ui_text['trans_source'])
-                                    elif grandchild.cget('text') == self.ui_languages[old_lang]['select_mic']:
-                                        grandchild.configure(text=ui_text['select_mic'])
-                                    elif grandchild.cget('text') == self.ui_languages[old_lang]['select_voice']:
-                                        grandchild.configure(text=ui_text['select_voice'])
-                                    elif grandchild.cget('text') == self.ui_languages[old_lang]['voice_speed']:
-                                        grandchild.configure(text=ui_text['voice_speed'])
-                                    elif grandchild.cget('text') == self.ui_languages[old_lang]['shortcut']:
-                                        grandchild.configure(text=ui_text['shortcut'])
-                elif isinstance(widget, ttk.Label):
-                    if widget.cget('text') == self.ui_languages[old_lang]['history']:
-                        widget.configure(text=ui_text['history'])
-                    elif widget.cget('text') == self.ui_languages[old_lang]['ui_language']:
-                        widget.configure(text=ui_text['ui_language'])
+            # 递归更新所有标签文本
+            def update_widget_text(widget):
+                if isinstance(widget, ttk.Label):
+                    current_text = widget.cget('text')
+                    # 检查当前文本是否匹配旧语言配置中的任何文本
+                    for key in self.ui_languages[old_lang]:
+                        if isinstance(self.ui_languages[old_lang][key], str) and current_text == self.ui_languages[old_lang][key]:
+                            widget.configure(text=ui_text[key])
+                            break
+                elif isinstance(widget, ttk.LabelFrame):
+                    current_text = widget.cget('text')
+                    # 检查当前文本是否匹配旧语言配置中的任何文本
+                    for key in self.ui_languages[old_lang]:
+                        if isinstance(self.ui_languages[old_lang][key], str) and current_text == self.ui_languages[old_lang][key]:
+                            widget.configure(text=ui_text[key])
+                            break
                 elif isinstance(widget, ttk.Button):
-                    if widget.cget('text') == self.ui_languages[old_lang]['api_settings']:
-                        widget.configure(text=ui_text['api_settings'])
+                    current_text = widget.cget('text')
+                    # 检查当前文本是否匹配旧语言配置中的任何文本
+                    for key in self.ui_languages[old_lang]:
+                        if isinstance(self.ui_languages[old_lang][key], str) and current_text == self.ui_languages[old_lang][key]:
+                            widget.configure(text=ui_text[key])
+                            break
+                
+                # 递归处理子控件
+                if hasattr(widget, 'winfo_children'):
+                    for child in widget.winfo_children():
+                        update_widget_text(child)
             
-            # 更新LabelFrame文本
-            for widget in self.window.winfo_children():
-                if isinstance(widget, ttk.LabelFrame):
-                    if widget.cget('text') == self.ui_languages[old_lang]['trans_result']:
-                        widget.configure(text=ui_text['trans_result'])
-                    elif widget.cget('text') == self.ui_languages[old_lang]['text_input']:
-                        widget.configure(text=ui_text['text_input'])
+            # 更新所有控件的文本
+            update_widget_text(self.window)
             
             # 更新历史记录显示
             self.update_history_display()
