@@ -1233,10 +1233,10 @@ class VoiceTranslator:
                                                    f"{speech_confidence:.2%}\n")
                             else:
                                 # 如果检测失败，使用选定的源语言
-                                source_lang = self.supported_languages[self.source_lang.get()]
+                                source_lang = self.get_lang_code(self.source_lang.get())
                                 text = self.recognizer.recognize_google(audio, language=source_lang)
                         else:
-                            source_lang = self.supported_languages[self.source_lang.get()]
+                            source_lang = self.get_lang_code(self.source_lang.get())
                             text = self.recognizer.recognize_google(audio, language=source_lang)
                         
                         if not text:
@@ -1330,8 +1330,8 @@ class VoiceTranslator:
         """异步执行翻译过程"""
         try:
             # 获取源语言和目标语言
-            source_lang = self.supported_languages[self.source_lang.get()]
-            target_lang = self.supported_languages[self.target_lang.get()]
+            source_lang = self.get_lang_code(self.source_lang.get())
+            target_lang = self.get_lang_code(self.target_lang.get())
             
             # 如果启用了自动检测，尝试检测语言
             if self.auto_detect.get():
@@ -1948,6 +1948,17 @@ class VoiceTranslator:
             
             # 更新历史记录显示
             self.update_history_display()
+
+    def get_lang_code(self, lang_name):
+        """获取语言代码的通用方法"""
+        # 如果输入已经是语言代码，直接返回
+        if lang_name in self.supported_languages.values():
+            return lang_name
+        # 从界面语言名称映射到语言代码
+        for key, value in self.ui_languages[self.current_ui_lang]['languages'].items():
+            if value == lang_name:
+                return self.supported_languages.get(key, 'auto')
+        return 'auto'
 
 if __name__ == '__main__':
     translator = VoiceTranslator()
