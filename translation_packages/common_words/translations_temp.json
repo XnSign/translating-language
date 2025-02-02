@@ -1,0 +1,26 @@
+{
+    "hello": {
+        "translations": {
+            "zh-CN": "你好",
+            "en": "hello",
+            "ja": "こんにちは",
+            "ko": "안녕하세요",
+            "fr": "bonjour",
+            "de": "hallo",
+            "es": "hola",
+            "ru": "здравствуйте"
+        },
+        "pos": "interjection",
+        "frequency": 100,
+        "category": "greetings",
+        "examples": {
+            "en": ["Hello, how are you?", "Hello world!"],
+            "zh-CN": ["你好，你好吗？", "世界，你好！"]
+        },
+        "alternatives": {
+            "zh-CN": ["您好", "哈喽"],
+            "en": ["hi", "hey"]
+        },
+        "related": ["hi", "greeting", "welcome"]
+    }
+} 

@@ -14,24 +14,18 @@
         "frequency": 100,
         "category": "greetings",
         "examples": {
-            "en": [
-                "Hello, how are you?",
-                "Hello, nice to meet you!"
-            ],
-            "zh-CN": [
-                "你好，最近好吗？",
-                "你好，很高兴认识你！"
-            ]
+            "en": ["Hello, how are you?", "Hello world!"],
+            "zh-CN": ["你好，你好吗？", "世界，你好！"]
         },
         "alternatives": {
-            "zh-CN": ["您好"],
+            "zh-CN": ["您好", "哈喽"],
             "en": ["hi", "hey"]
         },
         "related": ["hi", "greeting", "welcome"]
     },
     "thank": {
         "translations": {
-            "zh-CN": "感谢",
+            "zh-CN": "谢谢",
             "en": "thank",
             "ja": "ありがとう",
             "ko": "감사합니다",
@@ -39,24 +33,1530 @@
             "de": "danke",
             "es": "gracias",
             "ru": "спасибо"
+        }
+    },
+    "world": {
+        "translations": {
+            "zh-CN": "世界",
+            "en": "world",
+            "ja": "世界",
+            "ko": "세계",
+            "fr": "monde",
+            "de": "Welt",
+            "es": "mundo",
+            "ru": "мир"
+        }
+    },
+    "goodbye": {
+        "translations": {
+            "zh-CN": "再见",
+            "en": "goodbye",
+            "ja": "さようなら",
+            "ko": "안녕히 가세요",
+            "fr": "au revoir",
+            "de": "auf wiedersehen",
+            "es": "adiós",
+            "ru": "до свидания"
+        }
+    },
+    "love": {
+        "translations": {
+            "zh-CN": "爱",
+            "en": "love",
+            "ja": "愛",
+            "ko": "사랑",
+            "fr": "amour",
+            "de": "Liebe",
+            "es": "amor",
+            "ru": "любовь"
         },
         "pos": "verb",
         "frequency": 95,
-        "category": "courtesy",
+        "category": "emotions",
         "examples": {
-            "en": [
-                "Thank you very much!",
-                "I want to thank you for your help."
-            ],
-            "zh-CN": [
-                "非常感谢你！",
-                "我想感谢你的帮助。"
-            ]
+            "en": ["I love reading", "Love is beautiful"],
+            "zh-CN": ["我爱读书", "爱是美好的"]
         },
         "alternatives": {
-            "zh-CN": ["谢谢", "致谢"],
-            "en": ["appreciate", "acknowledge"]
+            "zh-CN": ["喜欢", "热爱"],
+            "en": ["adore", "cherish"]
         },
-        "related": ["gratitude", "appreciate", "thankful"]
+        "related": ["like", "affection", "care"]
+    },
+    "eat": {
+        "translations": {
+            "zh-CN": "吃",
+            "en": "eat",
+            "ja": "食べる",
+            "ko": "먹다",
+            "fr": "manger",
+            "de": "essen",
+            "es": "comer",
+            "ru": "есть"
+        }
+    },
+    "drink": {
+        "translations": {
+            "zh-CN": "喝",
+            "en": "drink",
+            "ja": "飲む",
+            "ko": "마시다",
+            "fr": "boire",
+            "de": "trinken",
+            "es": "beber",
+            "ru": "пить"
+        }
+    },
+    "sleep": {
+        "translations": {
+            "zh-CN": "睡觉",
+            "en": "sleep",
+            "ja": "寝る",
+            "ko": "자다",
+            "fr": "dormir",
+            "de": "schlafen",
+            "es": "dormir",
+            "ru": "спать"
+        }
+    },
+    "wear": {
+        "translations": {
+            "zh-CN": "穿",
+            "en": "wear",
+            "ja": "着る",
+            "ko": "입다",
+            "fr": "porter",
+            "de": "tragen",
+            "es": "llevar",
+            "ru": "носить"
+        }
+    },
+    "wash": {
+        "translations": {
+            "zh-CN": "洗",
+            "en": "wash",
+            "ja": "洗う",
+            "ko": "씻다",
+            "fr": "laver",
+            "de": "waschen",
+            "es": "lavar",
+            "ru": "мыть"
+        }
+    },
+    "look": {
+        "translations": {
+            "zh-CN": "看",
+            "en": "look",
+            "ja": "見る",
+            "ko": "보다",
+            "fr": "regarder",
+            "de": "schauen",
+            "es": "mirar",
+            "ru": "смотреть"
+        }
+    },
+    "see": {
+        "translations": {
+            "zh-CN": "看见",
+            "en": "see",
+            "ja": "見える",
+            "ko": "보이다",
+            "fr": "voir",
+            "de": "sehen",
+            "es": "ver",
+            "ru": "видеть"
+        }
+    },
+    "watch": {
+        "translations": {
+            "zh-CN": "观看",
+            "en": "watch",
+            "ja": "観る",
+            "ko": "보다",
+            "fr": "regarder",
+            "de": "ansehen",
+            "es": "ver",
+            "ru": "смотреть"
+        }
+    },
+    "find": {
+        "translations": {
+            "zh-CN": "找到",
+            "en": "find",
+            "ja": "見つける",
+            "ko": "찾다",
+            "fr": "trouver",
+            "de": "finden",
+            "es": "encontrar",
+            "ru": "находить"
+        }
+    },
+    "search": {
+        "translations": {
+            "zh-CN": "搜索",
+            "en": "search",
+            "ja": "検索",
+            "ko": "검색",
+            "fr": "chercher",
+            "de": "suchen",
+            "es": "buscar",
+            "ru": "искать"
+        }
+    },
+    "help": {
+        "translations": {
+            "zh-CN": "帮助",
+            "en": "help",
+            "ja": "助ける",
+            "ko": "돕다",
+            "fr": "aider",
+            "de": "helfen",
+            "es": "ayudar",
+            "ru": "помогать"
+        }
+    },
+    "ask": {
+        "translations": {
+            "zh-CN": "问",
+            "en": "ask",
+            "ja": "聞く",
+            "ko": "묻다",
+            "fr": "demander",
+            "de": "fragen",
+            "es": "preguntar",
+            "ru": "спрашивать"
+        }
+    },
+    "answer": {
+        "translations": {
+            "zh-CN": "回答",
+            "en": "answer",
+            "ja": "答える",
+            "ko": "대답하다",
+            "fr": "répondre",
+            "de": "antworten",
+            "es": "responder",
+            "ru": "отвечать"
+        }
+    },
+    "happy": {
+        "translations": {
+            "zh-CN": "快乐",
+            "en": "happy",
+            "ja": "幸せ",
+            "ko": "행복한",
+            "fr": "heureux",
+            "de": "glücklich",
+            "es": "feliz",
+            "ru": "счастливый"
+        }
+    },
+    "sad": {
+        "translations": {
+            "zh-CN": "伤心",
+            "en": "sad",
+            "ja": "悲しい",
+            "ko": "슬픈",
+            "fr": "triste",
+            "de": "traurig",
+            "es": "triste",
+            "ru": "грустный"
+        }
+    },
+    "angry": {
+        "translations": {
+            "zh-CN": "生气",
+            "en": "angry",
+            "ja": "怒る",
+            "ko": "화난",
+            "fr": "en colère",
+            "de": "wütend",
+            "es": "enfadado",
+            "ru": "сердитый"
+        }
+    },
+    "tired": {
+        "translations": {
+            "zh-CN": "疲倦",
+            "en": "tired",
+            "ja": "疲れた",
+            "ko": "피곤한",
+            "fr": "fatigué",
+            "de": "müde",
+            "es": "cansado",
+            "ru": "уставший"
+        }
+    },
+    "busy": {
+        "translations": {
+            "zh-CN": "忙",
+            "en": "busy",
+            "ja": "忙しい",
+            "ko": "바쁜",
+            "fr": "occupé",
+            "de": "beschäftigt",
+            "es": "ocupado",
+            "ru": "занятый"
+        }
+    },
+    "free": {
+        "translations": {
+            "zh-CN": "空闲",
+            "en": "free",
+            "ja": "暇",
+            "ko": "한가한",
+            "fr": "libre",
+            "de": "frei",
+            "es": "libre",
+            "ru": "свободный"
+        }
+    },
+    "hungry": {
+        "translations": {
+            "zh-CN": "饿",
+            "en": "hungry",
+            "ja": "お腹が空いた",
+            "ko": "배고픈",
+            "fr": "avoir faim",
+            "de": "hungrig",
+            "es": "hambriento",
+            "ru": "голодный"
+        }
+    },
+    "thirsty": {
+        "translations": {
+            "zh-CN": "渴",
+            "en": "thirsty",
+            "ja": "喉が渇いた",
+            "ko": "목마른",
+            "fr": "avoir soif",
+            "de": "durstig",
+            "es": "sediento",
+            "ru": "жаждущий"
+        }
+    },
+    "afraid": {
+        "translations": {
+            "zh-CN": "害怕",
+            "en": "afraid",
+            "ja": "怖い",
+            "ko": "무서운",
+            "fr": "avoir peur",
+            "de": "ängstlich",
+            "es": "asustado",
+            "ru": "испуганный"
+        }
+    },
+    "son": {
+        "translations": {
+            "zh-CN": "儿子",
+            "en": "son",
+            "ja": "息子",
+            "ko": "아들",
+            "fr": "fils",
+            "de": "Sohn",
+            "es": "hijo",
+            "ru": "сын"
+        }
+    },
+    "daughter": {
+        "translations": {
+            "zh-CN": "女儿",
+            "en": "daughter",
+            "ja": "娘",
+            "ko": "딸",
+            "fr": "fille",
+            "de": "Tochter",
+            "es": "hija",
+            "ru": "дочь"
+        }
+    },
+    "brother": {
+        "translations": {
+            "zh-CN": "兄弟",
+            "en": "brother",
+            "ja": "兄弟",
+            "ko": "형제",
+            "fr": "frère",
+            "de": "Bruder",
+            "es": "hermano",
+            "ru": "брат"
+        }
+    },
+    "sister": {
+        "translations": {
+            "zh-CN": "姐妹",
+            "en": "sister",
+            "ja": "姉妹",
+            "ko": "자매",
+            "fr": "sœur",
+            "de": "Schwester",
+            "es": "hermana",
+            "ru": "сестра"
+        }
+    },
+    "grandfather": {
+        "translations": {
+            "zh-CN": "祖父",
+            "en": "grandfather",
+            "ja": "祖父",
+            "ko": "할아버지",
+            "fr": "grand-père",
+            "de": "Großvater",
+            "es": "abuelo",
+            "ru": "дедушка"
+        }
+    },
+    "grandmother": {
+        "translations": {
+            "zh-CN": "祖母",
+            "en": "grandmother",
+            "ja": "祖母",
+            "ko": "할머니",
+            "fr": "grand-mère",
+            "de": "Großmutter",
+            "es": "abuela",
+            "ru": "бабушка"
+        }
+    },
+    "husband": {
+        "translations": {
+            "zh-CN": "丈夫",
+            "en": "husband",
+            "ja": "夫",
+            "ko": "남편",
+            "fr": "mari",
+            "de": "Ehemann",
+            "es": "marido",
+            "ru": "муж"
+        }
+    },
+    "wife": {
+        "translations": {
+            "zh-CN": "妻子",
+            "en": "wife",
+            "ja": "妻",
+            "ko": "아내",
+            "fr": "femme",
+            "de": "Ehefrau",
+            "es": "esposa",
+            "ru": "жена"
+        }
+    },
+    "fish": {
+        "translations": {
+            "zh-CN": "鱼",
+            "en": "fish",
+            "ja": "魚",
+            "ko": "물고기",
+            "fr": "poisson",
+            "de": "Fisch",
+            "es": "pescado",
+            "ru": "рыба"
+        }
+    },
+    "meat": {
+        "translations": {
+            "zh-CN": "肉",
+            "en": "meat",
+            "ja": "肉",
+            "ko": "고기",
+            "fr": "viande",
+            "de": "Fleisch",
+            "es": "carne",
+            "ru": "мясо"
+        }
+    },
+    "vegetable": {
+        "translations": {
+            "zh-CN": "蔬菜",
+            "en": "vegetable",
+            "ja": "野菜",
+            "ko": "채소",
+            "fr": "légume",
+            "de": "Gemüse",
+            "es": "verdura",
+            "ru": "овощ"
+        }
+    },
+    "fruit": {
+        "translations": {
+            "zh-CN": "水果",
+            "en": "fruit",
+            "ja": "果物",
+            "ko": "과일",
+            "fr": "fruit",
+            "de": "Obst",
+            "es": "fruta",
+            "ru": "фрукт"
+        }
+    },
+    "egg": {
+        "translations": {
+            "zh-CN": "鸡蛋",
+            "en": "egg",
+            "ja": "卵",
+            "ko": "계란",
+            "fr": "œuf",
+            "de": "Ei",
+            "es": "huevo",
+            "ru": "яйцо"
+        }
+    },
+    "breakfast": {
+        "translations": {
+            "zh-CN": "早餐",
+            "en": "breakfast",
+            "ja": "朝食",
+            "ko": "아침",
+            "fr": "petit-déjeuner",
+            "de": "Frühstück",
+            "es": "desayuno",
+            "ru": "завтрак"
+        }
+    },
+    "lunch": {
+        "translations": {
+            "zh-CN": "午餐",
+            "en": "lunch",
+            "ja": "昼食",
+            "ko": "점심",
+            "fr": "déjeuner",
+            "de": "Mittagessen",
+            "es": "almuerzo",
+            "ru": "обед"
+        }
+    },
+    "dinner": {
+        "translations": {
+            "zh-CN": "晚餐",
+            "en": "dinner",
+            "ja": "夕食",
+            "ko": "저녁",
+            "fr": "dîner",
+            "de": "Abendessen",
+            "es": "cena",
+            "ru": "ужин"
+        }
+    },
+    "restaurant": {
+        "translations": {
+            "zh-CN": "餐厅",
+            "en": "restaurant",
+            "ja": "レストラン",
+            "ko": "식당",
+            "fr": "restaurant",
+            "de": "Restaurant",
+            "es": "restaurante",
+            "ru": "ресторан"
+        }
+    },
+    "cook": {
+        "translations": {
+            "zh-CN": "烹饪",
+            "en": "cook",
+            "ja": "料理する",
+            "ko": "요리하다",
+            "fr": "cuisiner",
+            "de": "kochen",
+            "es": "cocinar",
+            "ru": "готовить"
+        }
+    },
+    "clean": {
+        "translations": {
+            "zh-CN": "清洁",
+            "en": "clean",
+            "ja": "掃除する",
+            "ko": "청소하다",
+            "fr": "nettoyer",
+            "de": "reinigen",
+            "es": "limpiar",
+            "ru": "убирать"
+        }
+    },
+    "shower": {
+        "translations": {
+            "zh-CN": "淋浴",
+            "en": "shower",
+            "ja": "シャワーを浴びる",
+            "ko": "샤워하다",
+            "fr": "se doucher",
+            "de": "duschen",
+            "es": "ducharse",
+            "ru": "принимать душ"
+        }
+    },
+    "dress": {
+        "translations": {
+            "zh-CN": "穿衣服",
+            "en": "dress",
+            "ja": "服を着る",
+            "ko": "옷을 입다",
+            "fr": "s'habiller",
+            "de": "sich ankleiden",
+            "es": "vestirse",
+            "ru": "одеваться"
+        }
+    },
+    "rest": {
+        "translations": {
+            "zh-CN": "休息",
+            "en": "rest",
+            "ja": "休む",
+            "ko": "쉬다",
+            "fr": "se reposer",
+            "de": "ausruhen",
+            "es": "descansar",
+            "ru": "отдыхать"
+        }
+    },
+    "beside": {
+        "translations": {
+            "zh-CN": "旁边",
+            "en": "beside",
+            "ja": "そばに",
+            "ko": "옆에",
+            "fr": "à côté",
+            "de": "neben",
+            "es": "al lado",
+            "ru": "рядом"
+        }
+    },
+    "sing": {
+        "translations": {
+            "zh-CN": "唱歌",
+            "en": "sing",
+            "ja": "歌う",
+            "ko": "노래하다",
+            "fr": "chanter",
+            "de": "singen",
+            "es": "cantar",
+            "ru": "петь"
+        }
+    },
+    "dance": {
+        "translations": {
+            "zh-CN": "跳舞",
+            "en": "dance",
+            "ja": "踊る",
+            "ko": "춤추다",
+            "fr": "danser",
+            "de": "tanzen",
+            "es": "bailar",
+            "ru": "танцевать"
+        }
+    },
+    "music": {
+        "translations": {
+            "zh-CN": "音乐",
+            "en": "music",
+            "ja": "音楽",
+            "ko": "음악",
+            "fr": "musique",
+            "de": "Musik",
+            "es": "música",
+            "ru": "музыка"
+        }
+    },
+    "basketball": {
+        "translations": {
+            "zh-CN": "篮球",
+            "en": "basketball",
+            "ja": "バスケットボール",
+            "ko": "농구",
+            "fr": "basketball",
+            "de": "Basketball",
+            "es": "baloncesto",
+            "ru": "баскетбол"
+        }
+    },
+    "football": {
+        "translations": {
+            "zh-CN": "足球",
+            "en": "football",
+            "ja": "サッカー",
+            "ko": "축구",
+            "fr": "football",
+            "de": "Fußball",
+            "es": "fútbol",
+            "ru": "футбол"
+        }
+    },
+    "tennis": {
+        "translations": {
+            "zh-CN": "网球",
+            "en": "tennis",
+            "ja": "テニス",
+            "ko": "테니스",
+            "fr": "tennis",
+            "de": "Tennis",
+            "es": "tenis",
+            "ru": "теннис"
+        }
+    },
+    "movie": {
+        "translations": {
+            "zh-CN": "电影",
+            "en": "movie",
+            "ja": "映画",
+            "ko": "영화",
+            "fr": "film",
+            "de": "Film",
+            "es": "película",
+            "ru": "фильм"
+        }
+    },
+    "test": {
+        "translations": {
+            "zh-CN": "考试",
+            "en": "test",
+            "ja": "テスト",
+            "ko": "시험",
+            "fr": "examen",
+            "de": "Test",
+            "es": "examen",
+            "ru": "тест"
+        }
+    },
+    "homework": {
+        "translations": {
+            "zh-CN": "作业",
+            "en": "homework",
+            "ja": "宿題",
+            "ko": "숙제",
+            "fr": "devoir",
+            "de": "Hausaufgaben",
+            "es": "tarea",
+            "ru": "домашнее задание"
+        }
+    },
+    "lesson": {
+        "translations": {
+            "zh-CN": "课",
+            "en": "lesson",
+            "ja": "授業",
+            "ko": "수업",
+            "fr": "leçon",
+            "de": "Unterricht",
+            "es": "lección",
+            "ru": "урок"
+        }
+    },
+    "classroom": {
+        "translations": {
+            "zh-CN": "教室",
+            "en": "classroom",
+            "ja": "教室",
+            "ko": "교실",
+            "fr": "salle de classe",
+            "de": "Klassenzimmer",
+            "es": "aula",
+            "ru": "класс"
+        }
+    },
+    "company": {
+        "translations": {
+            "zh-CN": "公司",
+            "en": "company",
+            "ja": "会社",
+            "ko": "회사",
+            "fr": "entreprise",
+            "de": "Firma",
+            "es": "empresa",
+            "ru": "компания"
+        }
+    },
+    "money": {
+        "translations": {
+            "zh-CN": "钱",
+            "en": "money",
+            "ja": "お金",
+            "ko": "돈",
+            "fr": "argent",
+            "de": "Geld",
+            "es": "dinero",
+            "ru": "деньги"
+        }
+    },
+    "market": {
+        "translations": {
+            "zh-CN": "市场",
+            "en": "market",
+            "ja": "市場",
+            "ko": "시장",
+            "fr": "marché",
+            "de": "Markt",
+            "es": "mercado",
+            "ru": "рынок"
+        }
+    },
+    "price": {
+        "translations": {
+            "zh-CN": "价格",
+            "en": "price",
+            "ja": "価格",
+            "ko": "가격",
+            "fr": "prix",
+            "de": "Preis",
+            "es": "precio",
+            "ru": "цена"
+        }
+    },
+    "office": {
+        "translations": {
+            "zh-CN": "办公室",
+            "en": "office",
+            "ja": "オフィス",
+            "ko": "사무실",
+            "fr": "bureau",
+            "de": "Büro",
+            "es": "oficina",
+            "ru": "офис"
+        }
+    },
+    "internet": {
+        "translations": {
+            "zh-CN": "互联网",
+            "en": "internet",
+            "ja": "インターネット",
+            "ko": "인터넷",
+            "fr": "internet",
+            "de": "Internet",
+            "es": "internet",
+            "ru": "интернет"
+        }
+    },
+    "email": {
+        "translations": {
+            "zh-CN": "电子邮件",
+            "en": "email",
+            "ja": "メール",
+            "ko": "이메일",
+            "fr": "courriel",
+            "de": "E-Mail",
+            "es": "correo electrónico",
+            "ru": "электронная почта"
+        }
+    },
+    "website": {
+        "translations": {
+            "zh-CN": "网站",
+            "en": "website",
+            "ja": "ウェブサイト",
+            "ko": "웹사이트",
+            "fr": "site web",
+            "de": "Webseite",
+            "es": "sitio web",
+            "ru": "веб-сайт"
+        }
+    },
+    "software": {
+        "translations": {
+            "zh-CN": "软件",
+            "en": "software",
+            "ja": "ソフトウェア",
+            "ko": "소프트웨어",
+            "fr": "logiciel",
+            "de": "Software",
+            "es": "software",
+            "ru": "программное обеспечение"
+        }
+    },
+    "password": {
+        "translations": {
+            "zh-CN": "密码",
+            "en": "password",
+            "ja": "パスワード",
+            "ko": "비밀번호",
+            "fr": "mot de passe",
+            "de": "Passwort",
+            "es": "contraseña",
+            "ru": "пароль"
+        }
+    },
+    "download": {
+        "translations": {
+            "zh-CN": "下载",
+            "en": "download",
+            "ja": "ダウンロード",
+            "ko": "다운로드",
+            "fr": "télécharger",
+            "de": "herunterladen",
+            "es": "descargar",
+            "ru": "скачать"
+        }
+    },
+    "upload": {
+        "translations": {
+            "zh-CN": "上传",
+            "en": "upload",
+            "ja": "アップロード",
+            "ko": "업로드",
+            "fr": "téléverser",
+            "de": "hochladen",
+            "es": "subir",
+            "ru": "загрузить"
+        }
+    },
+    "keyboard": {
+        "translations": {
+            "zh-CN": "键盘",
+            "en": "keyboard",
+            "ja": "キーボード",
+            "ko": "키보드",
+            "fr": "clavier",
+            "de": "Tastatur",
+            "es": "teclado",
+            "ru": "клавиатура"
+        }
+    },
+    "mouse": {
+        "translations": {
+            "zh-CN": "鼠标",
+            "en": "mouse",
+            "ja": "マウス",
+            "ko": "마우스",
+            "fr": "souris",
+            "de": "Maus",
+            "es": "ratón",
+            "ru": "мышь"
+        }
+    },
+    "printer": {
+        "translations": {
+            "zh-CN": "打印机",
+            "en": "printer",
+            "ja": "プリンター",
+            "ko": "프린터",
+            "fr": "imprimante",
+            "de": "Drucker",
+            "es": "impresora",
+            "ru": "принтер"
+        }
+    },
+    "car": {
+        "translations": {
+            "zh-CN": "汽车",
+            "en": "car",
+            "ja": "車",
+            "ko": "자동차",
+            "fr": "voiture",
+            "de": "Auto",
+            "es": "coche",
+            "ru": "машина"
+        }
+    },
+    "bus": {
+        "translations": {
+            "zh-CN": "公交车",
+            "en": "bus",
+            "ja": "バス",
+            "ko": "버스",
+            "fr": "bus",
+            "de": "Bus",
+            "es": "autobús",
+            "ru": "автобус"
+        }
+    },
+    "train": {
+        "translations": {
+            "zh-CN": "火车",
+            "en": "train",
+            "ja": "電車",
+            "ko": "기차",
+            "fr": "train",
+            "de": "Zug",
+            "es": "tren",
+            "ru": "поезд"
+        }
+    },
+    "airplane": {
+        "translations": {
+            "zh-CN": "飞机",
+            "en": "airplane",
+            "ja": "飛行機",
+            "ko": "비행기",
+            "fr": "avion",
+            "de": "Flugzeug",
+            "es": "avión",
+            "ru": "самолёт"
+        }
+    },
+    "subway": {
+        "translations": {
+            "zh-CN": "地铁",
+            "en": "subway",
+            "ja": "地下鉄",
+            "ko": "지하철",
+            "fr": "métro",
+            "de": "U-Bahn",
+            "es": "metro",
+            "ru": "метро"
+        }
+    },
+    "weather": {
+        "translations": {
+            "zh-CN": "天气",
+            "en": "weather",
+            "ja": "天気",
+            "ko": "날씨",
+            "fr": "temps",
+            "de": "Wetter",
+            "es": "tiempo",
+            "ru": "погода"
+        }
+    },
+    "sunny": {
+        "translations": {
+            "zh-CN": "晴天",
+            "en": "sunny",
+            "ja": "晴れ",
+            "ko": "맑은",
+            "fr": "ensoleillé",
+            "de": "sonnig",
+            "es": "soleado",
+            "ru": "солнечно"
+        }
+    },
+    "rainy": {
+        "translations": {
+            "zh-CN": "下雨",
+            "en": "rainy",
+            "ja": "雨",
+            "ko": "비오는",
+            "fr": "pluvieux",
+            "de": "regnerisch",
+            "es": "lluvioso",
+            "ru": "дождливо"
+        }
+    },
+    "snowy": {
+        "translations": {
+            "zh-CN": "下雪",
+            "en": "snowy",
+            "ja": "雪",
+            "ko": "눈오는",
+            "fr": "neigeux",
+            "de": "verschneit",
+            "es": "nevado",
+            "ru": "снежно"
+        }
+    },
+    "cloudy": {
+        "translations": {
+            "zh-CN": "多云",
+            "en": "cloudy",
+            "ja": "曇り",
+            "ko": "흐린",
+            "fr": "nuageux",
+            "de": "bewölkt",
+            "es": "nublado",
+            "ru": "облачно"
+        }
+    },
+    "time": {
+        "translations": {
+            "zh-CN": "时间",
+            "en": "time",
+            "ja": "時間",
+            "ko": "시간",
+            "fr": "temps",
+            "de": "Zeit",
+            "es": "tiempo",
+            "ru": "время"
+        }
+    },
+    "morning": {
+        "translations": {
+            "zh-CN": "早上",
+            "en": "morning",
+            "ja": "朝",
+            "ko": "아침",
+            "fr": "matin",
+            "de": "Morgen",
+            "es": "mañana",
+            "ru": "утро"
+        }
+    },
+    "afternoon": {
+        "translations": {
+            "zh-CN": "下午",
+            "en": "afternoon",
+            "ja": "午後",
+            "ko": "오후",
+            "fr": "après-midi",
+            "de": "Nachmittag",
+            "es": "tarde",
+            "ru": "день"
+        }
+    },
+    "evening": {
+        "translations": {
+            "zh-CN": "晚上",
+            "en": "evening",
+            "ja": "夕方",
+            "ko": "저녁",
+            "fr": "soir",
+            "de": "Abend",
+            "es": "noche",
+            "ru": "вечер"
+        }
+    },
+    "night": {
+        "translations": {
+            "zh-CN": "夜晚",
+            "en": "night",
+            "ja": "夜",
+            "ko": "밤",
+            "fr": "nuit",
+            "de": "Nacht",
+            "es": "noche",
+            "ru": "ночь"
+        }
+    },
+    "today": {
+        "translations": {
+            "zh-CN": "今天",
+            "en": "today",
+            "ja": "今日",
+            "ko": "오늘",
+            "fr": "aujourd'hui",
+            "de": "heute",
+            "es": "hoy",
+            "ru": "сегодня"
+        }
+    },
+    "tomorrow": {
+        "translations": {
+            "zh-CN": "明天",
+            "en": "tomorrow",
+            "ja": "明日",
+            "ko": "내일",
+            "fr": "demain",
+            "de": "morgen",
+            "es": "mañana",
+            "ru": "завтра"
+        }
+    },
+    "yesterday": {
+        "translations": {
+            "zh-CN": "昨天",
+            "en": "yesterday",
+            "ja": "昨日",
+            "ko": "어제",
+            "fr": "hier",
+            "de": "gestern",
+            "es": "ayer",
+            "ru": "вчера"
+        }
+    },
+    "place": {
+        "translations": {
+            "zh-CN": "地方",
+            "en": "place",
+            "ja": "場所",
+            "ko": "장소",
+            "fr": "endroit",
+            "de": "Ort",
+            "es": "lugar",
+            "ru": "место"
+        }
+    },
+    "city": {
+        "translations": {
+            "zh-CN": "城市",
+            "en": "city",
+            "ja": "都市",
+            "ko": "도시",
+            "fr": "ville",
+            "de": "Stadt",
+            "es": "ciudad",
+            "ru": "город"
+        }
+    },
+    "country": {
+        "translations": {
+            "zh-CN": "国家",
+            "en": "country",
+            "ja": "国",
+            "ko": "나라",
+            "fr": "pays",
+            "de": "Land",
+            "es": "país",
+            "ru": "страна"
+        }
+    },
+    "nice_to_meet_you": {
+        "translations": {
+            "zh-CN": "很高兴认识你",
+            "en": "nice to meet you",
+            "ja": "はじめまして",
+            "ko": "만나서 반갑습니다",
+            "fr": "enchanté de vous rencontrer",
+            "de": "freut mich Sie kennenzulernen",
+            "es": "encantado de conocerte",
+            "ru": "приятно познакомиться"
+        }
+    },
+    "how_are_you": {
+        "translations": {
+            "zh-CN": "你好吗",
+            "en": "how are you",
+            "ja": "お元気ですか",
+            "ko": "어떻게 지내세요",
+            "fr": "comment allez-vous",
+            "de": "wie geht es dir",
+            "es": "cómo estás",
+            "ru": "как дела"
+        }
+    },
+    "good_morning": {
+        "translations": {
+            "zh-CN": "早上好",
+            "en": "good morning",
+            "ja": "おはようございます",
+            "ko": "안녕하세요",
+            "fr": "bonjour",
+            "de": "guten Morgen",
+            "es": "buenos días",
+            "ru": "доброе утро"
+        }
+    },
+    "good_night": {
+        "translations": {
+            "zh-CN": "晚安",
+            "en": "good night",
+            "ja": "おやすみなさい",
+            "ko": "안녕히 주무세요",
+            "fr": "bonne nuit",
+            "de": "gute Nacht",
+            "es": "buenas noches",
+            "ru": "спокойной ночи"
+        }
+    },
+    "excuse_me": {
+        "translations": {
+            "zh-CN": "对不起",
+            "en": "excuse me",
+            "ja": "すみません",
+            "ko": "실례합니다",
+            "fr": "excusez-moi",
+            "de": "Entschuldigung",
+            "es": "perdón",
+            "ru": "извините"
+        }
+    },
+    "you_are_welcome": {
+        "translations": {
+            "zh-CN": "不客气",
+            "en": "you are welcome",
+            "ja": "どういたしまして",
+            "ko": "천만에요",
+            "fr": "je vous en prie",
+            "de": "bitte schön",
+            "es": "de nada",
+            "ru": "пожалуйста"
+        }
+    },
+    "see_you_later": {
+        "translations": {
+            "zh-CN": "回头见",
+            "en": "see you later",
+            "ja": "また会いましょう",
+            "ko": "나중에 봐요",
+            "fr": "à plus tard",
+            "de": "bis später",
+            "es": "hasta luego",
+            "ru": "до встречи"
+        }
+    },
+    "take_care": {
+        "translations": {
+            "zh-CN": "保重",
+            "en": "take care",
+            "ja": "お気をつけて",
+            "ko": "조심히 가세요",
+            "fr": "prenez soin de vous",
+            "de": "pass auf dich auf",
+            "es": "cuídate",
+            "ru": "береги себя"
+        }
+    },
+    "i_love_you": {
+        "translations": {
+            "zh-CN": "我爱你",
+            "en": "i love you",
+            "ja": "愛してます",
+            "ko": "사랑해요",
+            "fr": "je t'aime",
+            "de": "ich liebe dich",
+            "es": "te quiero",
+            "ru": "я люблю тебя"
+        },
+        "pos": "phrase",
+        "frequency": 90,
+        "category": "expressions",
+        "examples": {
+            "en": ["I love you so much", "I love you too"],
+            "zh-CN": ["我很爱你", "我也爱你"]
+        },
+        "alternatives": {
+            "zh-CN": ["我爱着你", "我好爱你"],
+            "en": ["I love u", "love you"]
+        },
+        "related": ["love", "affection", "care"]
+    },
+    "happy_birthday": {
+        "translations": {
+            "zh-CN": "生日快乐",
+            "en": "happy birthday",
+            "ja": "お誕生日おめでとう",
+            "ko": "생일 축하해요",
+            "fr": "joyeux anniversaire",
+            "de": "alles Gute zum Geburtstag",
+            "es": "feliz cumpleaños",
+            "ru": "с днем рождения"
+        }
+    },
+    "what_time_is_it": {
+        "translations": {
+            "zh-CN": "现在几点",
+            "en": "what time is it",
+            "ja": "今何時ですか",
+            "ko": "지금 몇 시예요",
+            "fr": "quelle heure est-il",
+            "de": "wie spät ist es",
+            "es": "qué hora es",
+            "ru": "который час"
+        }
+    },
+    "where_is_the_bathroom": {
+        "translations": {
+            "zh-CN": "洗手间在哪里",
+            "en": "where is the bathroom",
+            "ja": "お手洗いはどこですか",
+            "ko": "화장실이 어디에 있나요",
+            "fr": "où sont les toilettes",
+            "de": "wo ist die Toilette",
+            "es": "dónde está el baño",
+            "ru": "где туалет"
+        }
+    },
+    "i_dont_understand": {
+        "translations": {
+            "zh-CN": "我不明白",
+            "en": "i don't understand",
+            "ja": "分かりません",
+            "ko": "이해가 안 돼요",
+            "fr": "je ne comprends pas",
+            "de": "ich verstehe nicht",
+            "es": "no entiendo",
+            "ru": "я не понимаю"
+        }
+    },
+    "can_you_help_me": {
+        "translations": {
+            "zh-CN": "你能帮我吗",
+            "en": "can you help me",
+            "ja": "手伝っていただけますか",
+            "ko": "도와주실 수 있나요",
+            "fr": "pouvez-vous m'aider",
+            "de": "können Sie mir helfen",
+            "es": "puede ayudarme",
+            "ru": "можете мне помочь"
+        }
+    },
+    "how_much_is_this": {
+        "translations": {
+            "zh-CN": "这个多少钱",
+            "en": "how much is this",
+            "ja": "これはいくらですか",
+            "ko": "이거 얼마예요",
+            "fr": "combien ça coûte",
+            "de": "wie viel kostet das",
+            "es": "cuánto cuesta esto",
+            "ru": "сколько это стоит"
+        }
+    },
+    "i_would_like_to_order": {
+        "translations": {
+            "zh-CN": "我想点餐",
+            "en": "i would like to order",
+            "ja": "注文したいです",
+            "ko": "주문하고 싶습니다",
+            "fr": "je voudrais commander",
+            "de": "ich möchte bestellen",
+            "es": "quisiera ordenar",
+            "ru": "я хотел бы заказать"
+        }
+    },
+    "the_bill_please": {
+        "translations": {
+            "zh-CN": "请结账",
+            "en": "the bill please",
+            "ja": "お会計お願いします",
+            "ko": "계산서 주세요",
+            "fr": "l'addition s'il vous plaît",
+            "de": "die Rechnung bitte",
+            "es": "la cuenta por favor",
+            "ru": "счёт, пожалуйста"
+        }
+    },
+    "is_this_available": {
+        "translations": {
+            "zh-CN": "这个有货吗",
+            "en": "is this available",
+            "ja": "在庫はありますか",
+            "ko": "이거 있나요",
+            "fr": "est-ce disponible",
+            "de": "ist das verfügbar",
+            "es": "está disponible",
+            "ru": "это есть в наличии"
+        }
+    },
+    "do_you_accept_credit_cards": {
+        "translations": {
+            "zh-CN": "你们接受信用卡吗",
+            "en": "do you accept credit cards",
+            "ja": "クレジットカードは使えますか",
+            "ko": "신용카드 받나요",
+            "fr": "acceptez-vous les cartes de crédit",
+            "de": "akzeptieren Sie Kreditkarten",
+            "es": "aceptan tarjetas de crédito",
+            "ru": "принимаете кредитные карты"
+        }
+    },
+    "call_the_police": {
+        "translations": {
+            "zh-CN": "报警",
+            "en": "call the police",
+            "ja": "警察を呼んでください",
+            "ko": "경찰을 불러주세요",
+            "fr": "appelez la police",
+            "de": "rufen Sie die Polizei",
+            "es": "llame a la policía",
+            "ru": "вызовите полицию"
+        }
+    },
+    "i_need_a_doctor": {
+        "translations": {
+            "zh-CN": "我需要医生",
+            "en": "i need a doctor",
+            "ja": "医者が必要です",
+            "ko": "의사가 필요해요",
+            "fr": "j'ai besoin d'un médecin",
+            "de": "ich brauche einen Arzt",
+            "es": "necesito un médico",
+            "ru": "мне нужен врач"
+        }
+    },
+    "where_is_the_nearest_hospital": {
+        "translations": {
+            "zh-CN": "最近的医院在哪里",
+            "en": "where is the nearest hospital",
+            "ja": "一番近い病院はどこですか",
+            "ko": "가장 가까운 병원이 어디에 있나요",
+            "fr": "où est l'hôpital le plus proche",
+            "de": "wo ist das nächste Krankenhaus",
+            "es": "dónde está el hospital más cercano",
+            "ru": "где ближайшая больница"
+        }
+    },
+    "i_am_lost": {
+        "translations": {
+            "zh-CN": "我迷路了",
+            "en": "i am lost",
+            "ja": "道に迷いました",
+            "ko": "길을 잃었어요",
+            "fr": "je suis perdu",
+            "de": "ich habe mich verlaufen",
+            "es": "estoy perdido",
+            "ru": "я заблудился"
+        }
+    },
+    "can_you_speak_more_slowly": {
+        "translations": {
+            "zh-CN": "你能说慢一点吗",
+            "en": "can you speak more slowly",
+            "ja": "もっとゆっくり話してください",
+            "ko": "좀 더 천천히 말씀해 주시겠어요",
+            "fr": "pouvez-vous parler plus lentement",
+            "de": "können Sie langsamer sprechen",
+            "es": "puede hablar más despacio",
+            "ru": "можете говорить помедленнее"
+        }
+    },
+    "could_you_repeat_that": {
+        "translations": {
+            "zh-CN": "你能重复一遍吗",
+            "en": "could you repeat that",
+            "ja": "もう一度言ってください",
+            "ko": "다시 한 번 말씀해 주시겠어요",
+            "fr": "pourriez-vous répéter",
+            "de": "könnten Sie das wiederholen",
+            "es": "podría repetirlo",
+            "ru": "не могли бы вы повторить"
+        }
+    },
+    "do_you_have_wifi": {
+        "translations": {
+            "zh-CN": "这里有无线网络吗",
+            "en": "do you have wifi",
+            "ja": "Wi-Fiはありますか",
+            "ko": "와이파이 있나요",
+            "fr": "avez-vous le wifi",
+            "de": "haben Sie WLAN",
+            "es": "tienen wifi",
+            "ru": "есть ли у вас вай-фай"
+        }
+    },
+    "where_can_i_buy_tickets": {
+        "translations": {
+            "zh-CN": "在哪里可以买票",
+            "en": "where can i buy tickets",
+            "ja": "チケットはどこで買えますか",
+            "ko": "표는 어디서 살 수 있나요",
+            "fr": "où puis-je acheter des billets",
+            "de": "wo kann ich Tickets kaufen",
+            "es": "dónde puedo comprar billetes",
+            "ru": "где можно купить билеты"
+        }
+    },
+    "is_there_a_discount": {
+        "translations": {
+            "zh-CN": "有折扣吗",
+            "en": "is there a discount",
+            "ja": "割引はありますか",
+            "ko": "할인 있나요",
+            "fr": "y a-t-il une réduction",
+            "de": "gibt es einen Rabatt",
+            "es": "hay descuento",
+            "ru": "есть ли скидка"
+        }
+    },
+    "what_do_you_recommend": {
+        "translations": {
+            "zh-CN": "你推荐什么",
+            "en": "what do you recommend",
+            "ja": "おすすめは何ですか",
+            "ko": "추천해 주실 만한 것이 있나요",
+            "fr": "que recommandez-vous",
+            "de": "was empfehlen Sie",
+            "es": "qué recomienda",
+            "ru": "что вы рекомендуете"
+        }
+    },
+    "can_i_try_it_on": {
+        "translations": {
+            "zh-CN": "我可以试穿吗",
+            "en": "can i try it on",
+            "ja": "試着してもいいですか",
+            "ko": "입어볼 수 있나요",
+            "fr": "puis-je l'essayer",
+            "de": "kann ich das anprobieren",
+            "es": "puedo probármelo",
+            "ru": "можно примерить"
+        }
     }
 } 
